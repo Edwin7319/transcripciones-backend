@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
+import { APP_MODULES } from './constants/constants';
 
 @Module({
   imports: [
@@ -14,16 +15,12 @@ import configuration from './config/configuration';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      connectionName: 'transcriptions',
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('database.uri'),
-        useNewUrlParser: configService.get<boolean>('database.useNewUrlParser'),
-        useUnifiedTopology: configService.get<boolean>(
-          'database.useUnifiedTopology',
-        ),
       }),
       inject: [ConfigService],
     }),
+    ...APP_MODULES,
   ],
   controllers: [AppController],
   providers: [AppService],
