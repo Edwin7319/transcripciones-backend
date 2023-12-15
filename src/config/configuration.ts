@@ -6,4 +6,8 @@ export default () => ({
     useNewUrlParser: process.env.DATABASE_USE_NEW_URL_PARSER === 'true',
     useUnifiedTopology: process.env.DATABASE_USE_UNIFIED_TOPOLOGY === 'true',
   },
+  bucket: {
+    audio: process.env.BUCKET_AUDIO,
+    audioCopy: process.env.BUCKET_AUDIO_COPY,
+  },
 });

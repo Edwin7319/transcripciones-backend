@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { TerminusModule } from '@nestjs/terminus';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -21,6 +22,7 @@ import { APP_MODULES } from './constants/constants';
       inject: [ConfigService],
     }),
     ...APP_MODULES,
+    TerminusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
