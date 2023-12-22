@@ -3,15 +3,18 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 
@@ -58,5 +61,13 @@ export class AudioRecordingController {
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<boolean> {
     return this._audioRecordingService.delete(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Header('Content-Type', 'application/octet-stream')
+  @Get('obtener-audio/:id')
+  async getAudio(@Param('id') id: string, @Res() res: Response): Promise<void> {
+    const buffer = await this._audioRecordingService.getAudio(id);
+    res.send(buffer);
   }
 }

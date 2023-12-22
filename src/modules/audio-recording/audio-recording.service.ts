@@ -110,7 +110,31 @@ export class AudioRecordingService {
     }
   }
 
+  async getAudio(id: string): Promise<Buffer> {
+    try {
+      const audioRecording = await this.getById(id);
+
+      return this.readFileToBuffer(`./${audioRecording.path}`);
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Error al descargar audio',
+      });
+    }
+  }
+
   async getById(id: string): Promise<AudioRecordingDocument> {
     return this._audioRecordingModel.findById(id).exec();
+  }
+
+  private readFileToBuffer(filePath: string): Promise<Buffer> {
+    return new Promise<Buffer>((resolve, reject) => {
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
   }
 }
