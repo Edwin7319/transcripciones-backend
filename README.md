@@ -77,7 +77,7 @@ Nest is [MIT licensed](LICENSE).
 En el archivo con las variables de entorno `.env` vamos a usar la variable `MLABS_COMMAND` para poder definir el comando a ser utilizado.
 
 ```dotenv
-MLABS_COMMAND="algun comando"
+MLABS_COMMAND="C://mi-carpeta//wscript.exe"
 ```
 
 En el codigo vamos a usar el servicio de la siguiente manera:
@@ -85,22 +85,22 @@ En el codigo vamos a usar el servicio de la siguiente manera:
 ```typescript
 async function algunaFuncion(){
   try{
-    const respuestaTerminal = await this.commandService.executeCommand('algunos.pdf --parametros --del --comando')
+    const respuestaTerminal = await this.commandService.executeCommand('codigo2.voz C://otra/carpeta')
     // El servicio va a ejecutar en la terminal lo siguiente:
-    // >> algun comando algunos.pdf --parametros --del --comando
+    // >> C://mi-carpeta//wscript.exe codigo2.voz C://otra/carpeta
   }catch (error){
     console.error('algun error', error);
   }
 }
 ```
 
-En este caso el comando completo seria: `algun comando algunos.pdf --parametros --del --comando`, dependiendo que se 
+En este caso el comando completo seria: `C://mi-carpeta//wscript.exe codigo2.voz C://otra/carpeta`, dependiendo que se 
 use en la variable de entorno + parametro de la funcion, se va a componer el comando:
 
 ```typescript
-// MLABS_COMMAND="algun comando"
-this.commandService.executeCommand('algunos.pdf --parametros --del --comando')
+// MLABS_COMMAND="C://mi-carpeta//wscript.exe "
+this.commandService.executeCommand('codigo2.voz C://otra/carpeta')
 // MLABS_COMMAND + argumento funcion
 // Dando como resultado:
-// algun comando algunos.pdf --parametros --del --comando
+// C://mi-carpeta//wscript.exe codigo2.voz C://otra/carpeta
 ```
