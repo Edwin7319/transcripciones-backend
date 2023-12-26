@@ -12,6 +12,7 @@ import {
   AudioRecordingDocument,
 } from './audio-recording.schema';
 import { CreateAudioRecordingDto } from './dto/create-audio-recording.dto';
+import { UpdateAudioRecordingDto } from './dto/update-audio-recording.dto';
 
 @Injectable()
 export class AudioRecordingService {
@@ -40,6 +41,7 @@ export class AudioRecordingService {
         name: data.name,
         originalName: originalname,
         creationTime: Util.getCurrentTimestamp(),
+        duration: parseFloat(data.duration),
         path,
         destination,
         size,
@@ -81,7 +83,7 @@ export class AudioRecordingService {
 
   async edit(
     id: string,
-    data: CreateAudioRecordingDto,
+    data: UpdateAudioRecordingDto,
   ): Promise<AudioRecordingDocument> {
     try {
       await this._audioRecordingModel
