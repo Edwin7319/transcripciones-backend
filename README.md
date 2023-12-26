@@ -71,3 +71,36 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## Uso del comando para el servicio `Commands`
+
+En el archivo con las variables de entorno `.env` vamos a usar la variable `MLABS_COMMAND` para poder definir el comando a ser utilizado.
+
+```dotenv
+MLABS_COMMAND="algun comando"
+```
+
+En el codigo vamos a usar el servicio de la siguiente manera:
+
+```typescript
+async function algunaFuncion(){
+  try{
+    const respuestaTerminal = await this.commandService.executeCommand('algunos.pdf --parametros --del --comando')
+    // El servicio va a ejecutar en la terminal lo siguiente:
+    // >> algun comando algunos.pdf --parametros --del --comando
+  }catch (error){
+    console.error('algun error', error);
+  }
+}
+```
+
+En este caso el comando completo seria: `algun comando algunos.pdf --parametros --del --comando`, dependiendo que se 
+use en la variable de entorno + parametro de la funcion, se va a componer el comando:
+
+```typescript
+// MLABS_COMMAND="algun comando"
+this.commandService.executeCommand('algunos.pdf --parametros --del --comando')
+// MLABS_COMMAND + argumento funcion
+// Dando como resultado:
+// algun comando algunos.pdf --parametros --del --comando
+```
