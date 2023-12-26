@@ -31,6 +31,9 @@ export class AudioRecording {
 
   @Prop({ type: String, required: false })
   pathCopy: string;
+
+  @Prop({ type: Number, required: true })
+  duration: number;
 }
 
 export const AudioRecordingSchema =

@@ -70,4 +70,13 @@ export class AudioRecordingController {
     const buffer = await this._audioRecordingService.getAudio(id);
     res.send(buffer);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':filename')
+  serveAudioFile(
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ): void {
+    res.sendFile(filename, { root: 'public/audio-copy' });
+  }
 }
