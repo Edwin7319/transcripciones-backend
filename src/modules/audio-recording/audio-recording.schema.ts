@@ -1,6 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
+export enum EAudioRecordingStatus {
+  CREATED = 'CREADO',
+  EXECUTED_COMMAND = 'EJECUTADO SCRIPT',
+  SAVE_TRANSCRIPTION = 'TRANSCRIPCIONES GUARDADAS',
+  COMPLETED = 'COMPLETO',
+}
+
 export type AudioRecordingDocument = HydratedDocument<AudioRecording>;
 
 @Schema({ timestamps: true })
@@ -34,6 +41,9 @@ export class AudioRecording {
 
   @Prop({ type: Number, required: true })
   duration: number;
+
+  @Prop({ type: String, required: true })
+  status: EAudioRecordingStatus;
 }
 
 export const AudioRecordingSchema =

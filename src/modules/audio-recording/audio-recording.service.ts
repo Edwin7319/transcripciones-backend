@@ -12,6 +12,7 @@ import { TranscriptionFileService } from '../transcription-file/transcription-fi
 import {
   AudioRecording,
   AudioRecordingDocument,
+  EAudioRecordingStatus,
 } from './audio-recording.schema';
 import { CreateAudioRecordingDto } from './dto/create-audio-recording.dto';
 import { UpdateAudioRecordingDto } from './dto/update-audio-recording.dto';
@@ -47,6 +48,7 @@ export class AudioRecordingService {
         originalName: originalname,
         creationTime: Util.getCurrentTimestamp(),
         duration: parseFloat(data.duration),
+        status: EAudioRecordingStatus.CREATED,
         path,
         destination,
         size,
@@ -57,9 +59,17 @@ export class AudioRecordingService {
 
       const commandResponse = await this._commandService.executeCommand();
 
+      await this.edit(newAudioFile._id.toString(), {
+        status: EAudioRecordingStatus.EXECUTED_COMMAND,
+      });
+
       await this._transcriptionFileService.saveTranscriptionFiles(
         newAudioFile._id.toString(),
       );
+
+      await this.edit(newAudioFile._id.toString(), {
+        status: EAudioRecordingStatus.COMPLETED,
+      });
 
       return newAudioFile;
     } catch (error) {
