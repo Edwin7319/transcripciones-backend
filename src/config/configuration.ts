@@ -7,7 +7,11 @@ export default () => ({
     useUnifiedTopology: process.env.DATABASE_USE_UNIFIED_TOPOLOGY === 'true',
   },
   bucket: {
-    audio: process.env.BUCKET_AUDIO,
-    audioCopy: process.env.BUCKET_AUDIO_COPY,
+    audio: process.env.PATH_BUCKET_AUDIO,
+    audioCopy: process.env.PATH_BUCKET_AUDIO_COPY,
+  },
+  file: {
+    transcriptionPath: process.env.PATH_FILE_TRANSCRIPTION,
+    transcriptionLocationPath: process.env.PATH_FILE_TRANSCRIPTION_LOCATION,
   },
 });
