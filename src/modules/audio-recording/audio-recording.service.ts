@@ -6,6 +6,8 @@ import { Model } from 'mongoose';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
+import { CommandService } from '../commands/command.service';
+import { TranscriptionFileService } from '../transcription-file/transcription-file.service';
 
 import {
   AudioRecording,
@@ -14,12 +16,16 @@ import {
 import { CreateAudioRecordingDto } from './dto/create-audio-recording.dto';
 import { UpdateAudioRecordingDto } from './dto/update-audio-recording.dto';
 
+import * as nodePath from 'path';
+
 @Injectable()
 export class AudioRecordingService {
   constructor(
     @InjectModel(AudioRecording.name)
     private readonly _audioRecordingModel: Model<AudioRecording>,
     private readonly _configService: ConfigService,
+    private readonly _transcriptionFileService: TranscriptionFileService,
+    private readonly _commandService: CommandService,
   ) {}
 
   async create(
@@ -28,16 +34,15 @@ export class AudioRecordingService {
   ): Promise<AudioRecordingDocument> {
     try {
       const { originalname, path, destination, size } = file;
-      const uploadFilePath = path;
 
-      const fileBuffer = fs.readFileSync(uploadFilePath);
+      const fileBuffer = fs.readFileSync(path);
 
       const copyName = `${Util.getCurrentTimestamp()}_${originalname}`;
-      const destinationCopy = `${this._configService.get('bucket.audioCopy')}`;
-      const pathCopy = `${destinationCopy}/${copyName}`;
+      const destinationCopy = this._configService.get('bucket.audioCopy');
+      const pathCopy = nodePath.join(destinationCopy, copyName);
       fs.writeFileSync(pathCopy, fileBuffer);
 
-      return this._audioRecordingModel.create({
+      const newAudioFile = await this._audioRecordingModel.create({
         name: data.name,
         originalName: originalname,
         creationTime: Util.getCurrentTimestamp(),
@@ -49,7 +54,16 @@ export class AudioRecordingService {
         destinationCopy,
         pathCopy,
       });
+
+      const commandResponse = await this._commandService.executeCommand();
+
+      await this._transcriptionFileService.saveTranscriptionFiles(
+        newAudioFile._id.toString(),
+      );
+
+      return newAudioFile;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException({
         message: 'Error al crear registro de audio',
       });

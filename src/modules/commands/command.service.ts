@@ -6,7 +6,7 @@ const { exec } = require('node:child_process');
 @Injectable()
 export class CommandService {
   async executeCommand(
-    parameters?: string,
+    parameters = '',
   ): Promise<{ message: string; output: string }> {
     return new Promise((res, rej) => {
       const commandFromEnvironmentVariable = process.env.MLABS_COMMAND

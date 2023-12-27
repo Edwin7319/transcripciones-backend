@@ -19,5 +19,6 @@ import { TranscriptionFileService } from './transcription-file.service';
   ],
   providers: [TranscriptionFileService],
   controllers: [TranscriptionFileController],
+  exports: [TranscriptionFileService],
 })
 export class TranscriptionFileModule {}
