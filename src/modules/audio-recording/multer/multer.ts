@@ -32,8 +32,8 @@ export const AUDIO_MULTER: MulterOptions = {
   storage: diskStorage({
     destination: (req, file, cb) => {
       const [destination, destinationCopy] = [
-        process.env.BUCKET_AUDIO,
-        process.env.BUCKET_AUDIO_COPY,
+        process.env.PATH_BUCKET_AUDIO,
+        process.env.PATH_BUCKET_AUDIO_COPY,
       ];
       fs.mkdirsSync(destination);
       fs.mkdirsSync(destinationCopy);
