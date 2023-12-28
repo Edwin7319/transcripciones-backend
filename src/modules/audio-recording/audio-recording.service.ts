@@ -57,7 +57,13 @@ export class AudioRecordingService {
         pathCopy,
       });
 
-      const commandResponse = await this._commandService.executeCommand();
+      const fileName = originalname.split('.')[0];
+
+      const commandResponse = await this._commandService.executeCommand(
+        originalname,
+        fileName,
+      );
+      console.log({ commandResponse });
 
       await this.edit(newAudioFile._id.toString(), {
         status: EAudioRecordingStatus.EXECUTED_COMMAND,
@@ -65,6 +71,7 @@ export class AudioRecordingService {
 
       await this._transcriptionFileService.saveTranscriptionFiles(
         newAudioFile._id.toString(),
+        fileName,
       );
 
       await this.edit(newAudioFile._id.toString(), {
