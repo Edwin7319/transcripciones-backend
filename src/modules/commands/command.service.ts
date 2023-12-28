@@ -6,13 +6,20 @@ const { exec, spawn } = require('node:child_process');
 @Injectable()
 export class CommandService {
   async executeCommand(
-    parameters?: string,
+    audioName: string,
+    fileName: string,
+    parameters = '',
     enableSpawn = true,
   ): Promise<{ message: string; output: string }> {
     return new Promise((res, rej) => {
-      const commandFromEnvironmentVariable = process.env.MLABS_COMMAND
-        ? process.env.MLABS_COMMAND
-        : 'ls ./';
+      let commandFromEnvironmentVariable = 'ls ./';
+      const mlabsCommand = process.env.MLABS_COMMAND;
+      if (mlabsCommand) {
+        commandFromEnvironmentVariable = mlabsCommand
+          .replace(':audioName', audioName)
+          .replace(':fileName', fileName);
+      }
+      console.log({ commandFromEnvironmentVariable });
       if (enableSpawn) {
         try {
           let output = '';
