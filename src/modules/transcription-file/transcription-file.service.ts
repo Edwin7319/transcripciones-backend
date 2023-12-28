@@ -22,6 +22,7 @@ export class TranscriptionFileService {
 
   async saveTranscriptionFiles(
     audioRecordingId: string,
+    fileName = '',
   ): Promise<TranscriptionFileDocument> {
     const transcription = await this.getTranscription(audioRecordingId);
 
@@ -31,10 +32,14 @@ export class TranscriptionFileService {
 
     try {
       const transcription = await this.readFile(
-        this._configService.get('file.transcriptionPath'),
+        this._configService
+          .get<string>('file.transcriptionPath')
+          .replace(':fileName', fileName),
       );
       const transcriptionLocation = await this.readFile(
-        this._configService.get('file.transcriptionLocationPath'),
+        this._configService
+          .get<string>('file.transcriptionLocationPath')
+          .replace(':fileName', fileName),
       );
       const transcriptionArray = this.transformTextLocationToObjects(
         transcriptionLocation,
