@@ -29,33 +29,13 @@ export class AudioRecordingService {
     private readonly _commandService: CommandService,
   ) {}
 
-  async create(
+  async executeAudioProcess(
     data: CreateAudioRecordingDto,
     file: Express.Multer.File,
   ): Promise<AudioRecordingDocument> {
     try {
-      const { originalname, path, destination, size } = file;
-
-      const fileBuffer = fs.readFileSync(path);
-
-      const copyName = `${Util.getCurrentTimestamp()}_${originalname}`;
-      const destinationCopy = this._configService.get('bucket.audioCopy');
-      const pathCopy = nodePath.join(destinationCopy, copyName);
-      fs.writeFileSync(pathCopy, fileBuffer);
-
-      const newAudioFile = await this._audioRecordingModel.create({
-        name: data.name,
-        originalName: originalname,
-        creationTime: Util.getCurrentTimestamp(),
-        duration: parseFloat(data.duration),
-        status: EAudioRecordingStatus.CREATED,
-        path,
-        destination,
-        size,
-        copyName,
-        destinationCopy,
-        pathCopy,
-      });
+      const { originalname, newAudioFile } =
+        await this.createAudioFileInformation(data, file);
 
       const fileName = originalname.split('.')[0];
 
@@ -87,9 +67,47 @@ export class AudioRecordingService {
     }
   }
 
+  private async createAudioFileInformation(
+    data: CreateAudioRecordingDto,
+    file: Express.Multer.File,
+  ): Promise<{ originalname: string; newAudioFile: AudioRecordingDocument }> {
+    const { originalname, path, destination, size } = file;
+
+    const fileBuffer = fs.readFileSync(path);
+
+    const copyName = `${Util.getCurrentTimestamp()}_${originalname}`;
+    const destinationCopy = this._configService.get('bucket.audioCopy');
+    const pathCopy = nodePath.join(destinationCopy, copyName);
+    fs.writeFileSync(pathCopy, fileBuffer);
+
+    const newAudioFile = await this._audioRecordingModel.create({
+      name: data.name,
+      originalName: originalname,
+      creationTime: Util.getCurrentTimestamp(),
+      duration: parseFloat(data.duration),
+      status: EAudioRecordingStatus.CREATED,
+      path,
+      destination,
+      size,
+      copyName,
+      destinationCopy,
+      pathCopy,
+    });
+
+    return {
+      newAudioFile,
+      originalname,
+    };
+  }
+
   async getAll(): Promise<PaginationDto<AudioRecordingDocument>> {
     try {
       const [response] = await this._audioRecordingModel.aggregate([
+        {
+          $match: {
+            status: EAudioRecordingStatus.COMPLETED,
+          },
+        },
         {
           $sort: { _id: -1 },
         },
@@ -131,10 +149,7 @@ export class AudioRecordingService {
 
   async delete(id: string): Promise<boolean> {
     try {
-      const audioRecording = await this.getById(id);
-      console.log(audioRecording);
       await this._audioRecordingModel.deleteOne({ _id: id }).exec();
-
       return true;
     } catch (error) {
       throw new InternalServerErrorException({

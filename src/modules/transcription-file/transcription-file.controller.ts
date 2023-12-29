@@ -1,4 +1,12 @@
-import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Res,
+} from '@nestjs/common';
 
 import { TranscriptionFileDocument } from './transcription-file.schema';
 import { TranscriptionFileService } from './transcription-file.service';
@@ -25,5 +33,19 @@ export class TranscriptionFileController {
     @Param('audioRecordingId') audioRecordingId: string,
   ): Promise<TranscriptionFileDocument> {
     return this._transcriptionFileService.getTranscription(audioRecordingId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Header('Content-Type', 'application/octet-stream')
+  @Get('descargar-transcripcion/:audioRecordingId')
+  async getTranscriptionFile(
+    @Param('audioRecordingId') audioRecordingId: string,
+    @Res() res,
+  ): Promise<TranscriptionFileDocument> {
+    const buffer =
+      await this._transcriptionFileService.getTranscriptionFile(
+        audioRecordingId,
+      );
+    return res.type('txt').end(buffer, 'binary');
   }
 }
