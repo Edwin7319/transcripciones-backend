@@ -113,7 +113,7 @@ export class AudioRecordingService {
         },
         {
           $facet: {
-            data: [{ $skip: (1 - 1) * 10 }, { $limit: 10 }],
+            data: [{ $skip: (1 - 1) * 10 }, { $limit: 9999 }],
             metadata: [
               { $count: 'total' },
               { $addFields: { page: 1, limit: 10 } },
@@ -153,12 +153,12 @@ export class AudioRecordingService {
       return true;
     } catch (error) {
       throw new InternalServerErrorException({
-        message: 'Error al editar registro de audio',
+        message: 'Error al eliminar registro de audio',
       });
     }
   }
 
-  async getAudio(id: string): Promise<Buffer> {
+  async downloadTxtFile(id: string): Promise<Buffer> {
     try {
       const audioRecording = await this.getById(id);
 
