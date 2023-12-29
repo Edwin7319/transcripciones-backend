@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as htmlToDocx from 'html-to-docx';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 
@@ -56,7 +57,6 @@ export class RecordsService {
   }
 
   async getAll(fileId: string): Promise<PaginationDto<RecordsDocument>> {
-    console.log({ fileId });
     try {
       const [response] = await this._recordsSchema.aggregate([
         {
@@ -82,6 +82,17 @@ export class RecordsService {
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al obtener todos los registro de actas',
+      });
+    }
+  }
+
+  async generateWordDocument(recordId: string): Promise<Buffer> {
+    try {
+      const record = await this.getById(recordId);
+      return htmlToDocx(record.text);
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Error al generar documento de word',
       });
     }
   }
