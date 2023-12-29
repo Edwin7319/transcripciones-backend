@@ -4,6 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as fs from 'fs-extra';
 import { Model } from 'mongoose';
 
+import { Util } from '../../utils/Util';
+
 import { TranscriptionLocationDto } from './dto/transcription-location.dto';
 import {
   TranscriptionFile,
@@ -62,16 +64,19 @@ export class TranscriptionFileService {
     audioRecordingId: string,
   ): Promise<TranscriptionFileDocument> {
     try {
-      return this._transcriptionFileMode
-        .findOne({
-          audioRecording: audioRecordingId,
-        })
-        .exec();
+      return this._transcriptionFileMode.findOne({
+        audioRecording: audioRecordingId,
+      });
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al obtener transcripción',
       });
     }
+  }
+
+  async getTranscriptionFile(audioRecordingId: string): Promise<Buffer> {
+    const response = await this.getTranscription(audioRecordingId);
+    return Buffer.from(response.transcription, 'utf-8');
   }
 
   private async readFile(path: string): Promise<string> {
@@ -91,8 +96,10 @@ export class TranscriptionFileService {
 
         if (rangeMatches) {
           const range = {
-            init: rangeMatches[1],
-            end: rangeMatches[2],
+            startString: rangeMatches[1],
+            endString: rangeMatches[2],
+            start: Util.transformStringToSeconds(rangeMatches[1]),
+            end: Util.transformStringToSeconds(rangeMatches[2]),
           };
 
           const text = parts[2];

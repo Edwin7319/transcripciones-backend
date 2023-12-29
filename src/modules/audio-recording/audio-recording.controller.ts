@@ -39,7 +39,7 @@ export class AudioRecordingController {
     @UploadedFile() file: Express.Multer.File,
     @Body() data: CreateAudioRecordingDto,
   ): Promise<AudioRecordingDocument> {
-    return this._audioRecordingService.create(data, file);
+    return this._audioRecordingService.executeAudioProcess(data, file);
   }
 
   @HttpCode(HttpStatus.OK)
