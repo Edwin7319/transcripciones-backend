@@ -19,37 +19,36 @@ export class CommandService {
           .replace(':audioName', audioName)
           .replace(':fileName', fileName);
       }
-      console.log({ commandFromEnvironmentVariable });
-      if (enableSpawn) {
-        try {
-          let output = '';
-          const childSpawn = spawn(
-            commandFromEnvironmentVariable + parameters,
-            [],
-            {
-              detached: true,
-              shell: true,
-            },
-          );
-          childSpawn.stdout.on('data', (data) => {
-            output = output + data;
-          });
-          childSpawn.on('exit', (code) => {
-            if (code === 0) {
-              res({ message: 'Command executed succesfully', output });
-            }
-            rej({
-              error: `Error code ${code}`,
-              message: 'Could not execute commmand',
-            });
-          });
-        } catch (error) {
-          rej({
-            error: error,
-            message: 'Could not execute commmand',
-          });
-        }
-      }
+      // if (enableSpawn) {
+      //   try {
+      //     let output = '';
+      //     const childSpawn = spawn(
+      //       commandFromEnvironmentVariable + parameters,
+      //       [],
+      //       {
+      //         detached: true,
+      //         shell: true,
+      //       },
+      //     );
+      //     childSpawn.stdout.on('data', (data) => {
+      //       output = output + data;
+      //     });
+      //     childSpawn.on('exit', (code) => {
+      //       if (code === 0) {
+      //         res({ message: 'Command executed succesfully', output });
+      //       }
+      //       rej({
+      //         error: `Error code ${code}`,
+      //         message: 'Could not execute commmand',
+      //       });
+      //     });
+      //   } catch (error) {
+      //     rej({
+      //       error: error,
+      //       message: 'Could not execute commmand',
+      //     });
+      //   }
+      // }
       exec(
         commandFromEnvironmentVariable + parameters,
         (err, output: string) => {

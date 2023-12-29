@@ -67,7 +67,7 @@ export class AudioRecordingController {
   @Header('Content-Type', 'application/octet-stream')
   @Get('obtener-audio/:id')
   async getAudio(@Param('id') id: string, @Res() res: Response): Promise<void> {
-    const buffer = await this._audioRecordingService.getAudio(id);
+    const buffer = await this._audioRecordingService.downloadTxtFile(id);
     res.send(buffer);
   }
 

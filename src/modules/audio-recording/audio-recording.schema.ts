@@ -10,7 +10,7 @@ export enum EAudioRecordingStatus {
 
 export type AudioRecordingDocument = HydratedDocument<AudioRecording>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'InformacionDeAudio' })
 export class AudioRecording {
   @Prop({ type: String, required: true })
   name: string;

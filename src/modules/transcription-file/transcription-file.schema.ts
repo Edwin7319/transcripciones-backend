@@ -8,7 +8,7 @@ import { TranscriptionLocationDto } from './dto/transcription-location.dto';
 
 export type TranscriptionFileDocument = HydratedDocument<TranscriptionFile>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'ArchivoDeTranscripcion' })
 export class TranscriptionFile {
   @Prop({ type: String, required: false })
   transcriptionLocation: string;
