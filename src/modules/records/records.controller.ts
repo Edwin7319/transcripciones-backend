@@ -3,12 +3,15 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 
@@ -48,5 +51,19 @@ export class RecordsController {
     @Param('fileId') fileId: string,
   ): Promise<PaginationDto<RecordsDocument>> {
     return this._recordsService.getAll(fileId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  )
+  @Get('descargar-word/:recordId')
+  async generateWordDocument(
+    @Param('recordId') recordId: string,
+    @Res() res: Response,
+  ): Promise<any> {
+    const buffer = await this._recordsService.generateWordDocument(recordId);
+    return res.end(buffer, 'binary');
   }
 }
