@@ -1,6 +1,8 @@
 class RangeDto {
-  init: string;
-  end: string;
+  startString: string;
+  endString: string;
+  start: number;
+  end: number;
 }
 
 export class TranscriptionLocationDto {
