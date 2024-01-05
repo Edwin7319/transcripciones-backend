@@ -5,6 +5,7 @@ import * as fs from 'fs-extra';
 import { Model } from 'mongoose';
 
 import { Util } from '../../utils/Util';
+import { ELogAction, ELogSchema, Log } from '../log/log.schema';
 
 import { TranscriptionLocationDto } from './dto/transcription-location.dto';
 import {
@@ -19,6 +20,8 @@ export class TranscriptionFileService {
   constructor(
     @InjectModel(TranscriptionFile.name)
     private readonly _transcriptionFileMode: Model<TranscriptionFile>,
+    @InjectModel(Log.name)
+    private readonly _logModel: Model<Log>,
     private readonly _configService: ConfigService,
   ) {}
 
@@ -76,6 +79,13 @@ export class TranscriptionFileService {
 
   async getTranscriptionFile(audioRecordingId: string): Promise<Buffer> {
     const response = await this.getTranscription(audioRecordingId);
+
+    this._logModel.create({
+      user: 'Edwin',
+      schema: ELogSchema.TRANSCRIPTION_FILE,
+      action: ELogAction.DOWNLOAD_TXT_FILE,
+      current: response,
+    });
     return Buffer.from(response.transcription, 'utf-8');
   }
 

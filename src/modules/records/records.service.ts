@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
+import { ELogAction, ELogSchema, Log } from '../log/log.schema';
 
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
@@ -16,16 +17,27 @@ export class RecordsService {
   constructor(
     @InjectModel(Records.name)
     private readonly _recordsSchema: Model<Records>,
+    @InjectModel(Log.name)
+    private readonly _logModel: Model<Log>,
   ) {}
 
-  create(data: CreateRecordDto): Promise<RecordsDocument> {
+  async create(data: CreateRecordDto): Promise<RecordsDocument> {
     try {
-      return this._recordsSchema.create({
+      const response = await this._recordsSchema.create({
         text: data.text,
         name: data.name,
         transcriptionFile: new ObjectId(data.fileId),
         creationTime: Util.getCurrentTimestamp(),
       });
+
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.RECORDS,
+        action: ELogAction.CREATE,
+        current: response,
+      });
+
+      return response;
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al crear nueva acta',
@@ -35,9 +47,19 @@ export class RecordsService {
 
   async update(id: string, data: UpdateRecordDto): Promise<RecordsDocument> {
     try {
+      const currentRecord = await this.getById(id);
       await this._recordsSchema.updateOne({ _id: id }, { ...data }).exec();
+      const updatedRecord = await this.getById(id);
 
-      return this.getById(id);
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.RECORDS,
+        action: ELogAction.UPDATE,
+        current: updatedRecord,
+        previous: currentRecord,
+      });
+
+      return updatedRecord;
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al editar nueva acta',
@@ -47,7 +69,15 @@ export class RecordsService {
 
   async delete(id: string): Promise<boolean> {
     try {
+      const currentRecord = await this.getById(id);
       await this._recordsSchema.deleteOne({ _id: id }).exec();
+
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.RECORDS,
+        action: ELogAction.DELETE,
+        current: currentRecord,
+      });
       return true;
     } catch (error) {
       throw new InternalServerErrorException({
@@ -89,6 +119,14 @@ export class RecordsService {
   async generateWordDocument(recordId: string): Promise<Buffer> {
     try {
       const record = await this.getById(recordId);
+
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.RECORDS,
+        action: ELogAction.DOWNLOAD_DOCX_FILE,
+        current: record,
+      });
+
       return htmlToDocx(record.text);
     } catch (error) {
       throw new InternalServerErrorException({

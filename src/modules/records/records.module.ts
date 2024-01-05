@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { Log, LogSchema } from '../log/log.schema';
+
 import { RecordsController } from './records.controller';
 import { Records, RecordsSchema } from './records.schema';
 import { RecordsService } from './records.service';
@@ -11,6 +13,10 @@ import { RecordsService } from './records.service';
       {
         name: Records.name,
         schema: RecordsSchema,
+      },
+      {
+        name: Log.name,
+        schema: LogSchema,
       },
     ]),
   ],

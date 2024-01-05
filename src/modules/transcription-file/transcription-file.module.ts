@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { Log, LogSchema } from '../log/log.schema';
+
 import { TranscriptionFileController } from './transcription-file.controller';
 import {
   TranscriptionFile,
@@ -14,6 +16,10 @@ import { TranscriptionFileService } from './transcription-file.service';
       {
         name: TranscriptionFile.name,
         schema: TranscriptionFileSchema,
+      },
+      {
+        name: Log.name,
+        schema: LogSchema,
       },
     ]),
   ],
