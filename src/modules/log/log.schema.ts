@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
+import { Util } from '../../utils/Util';
+
 export enum ELogAction {
   CREATE = 'Crear',
   UPDATE = 'Actualizar',
@@ -9,9 +11,9 @@ export enum ELogAction {
   DOWNLOAD_DOCX_FILE = 'Descarga acta Word',
 }
 export enum ELogSchema {
-  AUDIO_RECORDING = 'Registro de audio',
-  RECORDS = 'Actas',
-  TRANSCRIPTION_FILE = 'Archivo de transcripción',
+  AUDIO_RECORDING = 'registro_de_audio',
+  RECORDS = 'actas',
+  TRANSCRIPTION_FILE = 'archivo_de_transcripción',
 }
 
 export type LogDocument = HydratedDocument<Log>;
@@ -25,6 +27,9 @@ export class Log {
 
   @Prop({ type: String, required: true })
     user: string;
+
+  @Prop({ type: Number, default: Util.getCurrentTimestamp })
+  creationTime: number;
 
   @Prop({ type: Object, required: false })
     previous: any;
