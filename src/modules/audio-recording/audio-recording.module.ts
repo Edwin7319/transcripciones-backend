@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { CommandModule } from '../commands/command.module';
+import { Log, LogSchema } from '../log/log.schema';
 import { TranscriptionFileModule } from '../transcription-file/transcription-file.module';
 
 import { AudioRecordingController } from './audio-recording.controller';
@@ -16,6 +17,10 @@ import { AudioRecordingService } from './audio-recording.service';
       {
         name: AudioRecording.name,
         schema: AudioRecordingSchema,
+      },
+      {
+        name: Log.name,
+        schema: LogSchema,
       },
     ]),
   ],

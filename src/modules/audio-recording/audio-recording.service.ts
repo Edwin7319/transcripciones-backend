@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
 import { CommandService } from '../commands/command.service';
+import { ELogAction, ELogSchema, Log } from '../log/log.schema';
 import { TranscriptionFileService } from '../transcription-file/transcription-file.service';
 
 import {
@@ -24,6 +25,8 @@ export class AudioRecordingService {
   constructor(
     @InjectModel(AudioRecording.name)
     private readonly _audioRecordingModel: Model<AudioRecording>,
+    @InjectModel(Log.name)
+    private readonly _logModel: Model<Log>,
     private readonly _configService: ConfigService,
     private readonly _transcriptionFileService: TranscriptionFileService,
     private readonly _commandService: CommandService,
@@ -33,34 +36,38 @@ export class AudioRecordingService {
     data: CreateAudioRecordingDto,
     file: Express.Multer.File,
   ): Promise<AudioRecordingDocument> {
+    let audioId = '';
     try {
       const { originalname, newAudioFile } =
         await this.createAudioFileInformation(data, file);
 
+      audioId = newAudioFile._id.toString();
+
       const fileName = originalname.split('.')[0];
+      await this._commandService.executeCommand(originalname, fileName);
 
-      const commandResponse = await this._commandService.executeCommand(
-        originalname,
-        fileName,
-      );
-      console.log({ commandResponse });
+      const [fileDocument] = await Promise.all([
+        this._transcriptionFileService.saveTranscriptionFiles(
+          audioId,
+          fileName,
+        ),
+        this.edit(newAudioFile._id.toString(), {
+          status: EAudioRecordingStatus.COMPLETED,
+        }),
+      ]);
 
-      await this.edit(newAudioFile._id.toString(), {
-        status: EAudioRecordingStatus.EXECUTED_COMMAND,
-      });
-
-      await this._transcriptionFileService.saveTranscriptionFiles(
-        newAudioFile._id.toString(),
-        fileName,
-      );
-
-      await this.edit(newAudioFile._id.toString(), {
-        status: EAudioRecordingStatus.COMPLETED,
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.TRANSCRIPTION_FILE,
+        action: ELogAction.CREATE,
+        current: fileDocument,
       });
 
       return newAudioFile;
     } catch (error) {
-      console.log(error);
+      await this.edit(audioId, {
+        status: EAudioRecordingStatus.ERROR,
+      });
       throw new InternalServerErrorException({
         message: 'Error al crear registro de audio',
       });
@@ -92,6 +99,13 @@ export class AudioRecordingService {
       copyName,
       destinationCopy,
       pathCopy,
+    });
+
+    this._logModel.create({
+      user: 'Edwin',
+      schema: ELogSchema.AUDIO_RECORDING,
+      action: ELogAction.CREATE,
+      current: newAudioFile,
     });
 
     return {
@@ -135,11 +149,23 @@ export class AudioRecordingService {
     data: UpdateAudioRecordingDto,
   ): Promise<AudioRecordingDocument> {
     try {
+      const currentRecording = await this.getById(id);
+
       await this._audioRecordingModel
         .updateOne({ _id: id }, { ...data })
         .exec();
 
-      return this.getById(id);
+      const updatedRecording = await this.getById(id);
+
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.AUDIO_RECORDING,
+        action: ELogAction.UPDATE,
+        previous: currentRecording,
+        current: updatedRecording,
+      });
+
+      return updatedRecording;
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al editar registro de audio',
@@ -149,7 +175,15 @@ export class AudioRecordingService {
 
   async delete(id: string): Promise<boolean> {
     try {
+      const currentRecording = await this.getById(id);
       await this._audioRecordingModel.deleteOne({ _id: id }).exec();
+
+      this._logModel.create({
+        user: 'Edwin',
+        schema: ELogSchema.AUDIO_RECORDING,
+        action: ELogAction.DELETE,
+        current: currentRecording,
+      });
       return true;
     } catch (error) {
       throw new InternalServerErrorException({

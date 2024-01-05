@@ -3,9 +3,8 @@ import { HydratedDocument } from 'mongoose';
 
 export enum EAudioRecordingStatus {
   CREATED = 'CREADO',
-  EXECUTED_COMMAND = 'EJECUTADO SCRIPT',
-  SAVE_TRANSCRIPTION = 'TRANSCRIPCIONES GUARDADAS',
   COMPLETED = 'COMPLETO',
+  ERROR = 'ERROR',
 }
 
 export type AudioRecordingDocument = HydratedDocument<AudioRecording>;
