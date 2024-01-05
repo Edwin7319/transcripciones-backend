@@ -82,7 +82,7 @@ export class TranscriptionFileService {
 
     this._logModel.create({
       user: 'Edwin',
-      schema: ELogSchema.TRANSCRIPTION_FILE,
+      schema: ELogSchema.AUDIO_RECORDING,
       action: ELogAction.DOWNLOAD_TXT_FILE,
       current: response,
     });
