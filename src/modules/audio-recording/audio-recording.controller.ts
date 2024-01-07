@@ -48,7 +48,7 @@ export class AudioRecordingController {
     @Body() data: UpdateAudioRecordingDto,
     @Param('id') id: string,
   ): Promise<AudioRecordingDocument> {
-    return this._audioRecordingService.edit(id, data);
+    return this._audioRecordingService.update(id, data);
   }
 
   @HttpCode(HttpStatus.OK)
