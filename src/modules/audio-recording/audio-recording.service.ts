@@ -51,7 +51,7 @@ export class AudioRecordingService {
           audioId,
           fileName,
         ),
-        this.edit(newAudioFile._id.toString(), {
+        this.update(audioId, {
           status: EAudioRecordingStatus.COMPLETED,
         }),
       ]);
@@ -65,7 +65,7 @@ export class AudioRecordingService {
 
       return newAudioFile;
     } catch (error) {
-      await this.edit(audioId, {
+      await this.update(audioId, {
         status: EAudioRecordingStatus.ERROR,
       });
       throw new InternalServerErrorException({
@@ -144,7 +144,7 @@ export class AudioRecordingService {
     }
   }
 
-  async edit(
+  async update(
     id: string,
     data: UpdateAudioRecordingDto,
   ): Promise<AudioRecordingDocument> {
