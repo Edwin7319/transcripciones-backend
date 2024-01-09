@@ -19,4 +19,14 @@ export class Util {
 
     return hours * 3600 + minutes * 60 + seconds + miliseconds / 1000;
   }
+
+  static generateGenericPassword(length = 8): string {
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$%&*()_+';
+
+    return Array.from({ length: length }, () => {
+      const indiceAleatorio = Math.floor(Math.random() * characters.length);
+      return characters.charAt(indiceAleatorio);
+    }).join('');
+  }
 }

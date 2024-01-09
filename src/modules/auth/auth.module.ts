@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
+import { UserModule } from '../user/user.module';
+
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -18,10 +20,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: (config: ConfigService) => ({
         secret: config.get('jwt.secretKey'),
         signOptions: {
-          expiresIn: config.get('jwt.expiration') || '1d',
+          expiresIn: config.get('jwt.expiration'),
         },
       }),
     }),
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, ConfigService, JwtStrategy],
