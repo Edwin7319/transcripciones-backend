@@ -7,23 +7,23 @@ export type RecordsDocument = HydratedDocument<Records>;
 @Schema({ timestamps: true, collection: 'Actas' })
 export class Records {
   @Prop({ type: String, required: true })
-    name: string;
+  name: string;
 
   @Prop({ type: String, required: true })
-    text: string;
+  text: string;
 
   @Prop({ type: Number, required: true })
   creationTime: number;
 
   @Prop({ type: String, required: false })
-    previousText: string;
+  previousText: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: TranscriptionFile.name,
     required: false,
   })
-    transcriptionFile: TranscriptionFile;
+  transcriptionFile: TranscriptionFile;
 }
 
 export const RecordsSchema = SchemaFactory.createForClass(Records);

@@ -18,7 +18,7 @@ export class RecordsService {
     @InjectModel(Records.name)
     private readonly _recordsSchema: Model<Records>,
     @InjectModel(Log.name)
-    private readonly _logModel: Model<Log>,
+    private readonly _logModel: Model<Log>
   ) {}
 
   async create(data: CreateRecordDto): Promise<RecordsDocument> {
