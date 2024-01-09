@@ -14,7 +14,7 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: false,
       },
-    }),
+    })
   );
   app.setGlobalPrefix('api');
   app.use(express.static('public'));

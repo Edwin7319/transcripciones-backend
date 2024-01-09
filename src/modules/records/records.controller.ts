@@ -34,7 +34,7 @@ export class RecordsController {
   @Put(':id')
   update(
     @Body() data: UpdateRecordDto,
-    @Param('id') id: string,
+    @Param('id') id: string
   ): Promise<RecordsDocument> {
     return this._recordsService.update(id, data);
   }
@@ -48,7 +48,7 @@ export class RecordsController {
   @HttpCode(HttpStatus.OK)
   @Get(':fileId')
   async getAll(
-    @Param('fileId') fileId: string,
+    @Param('fileId') fileId: string
   ): Promise<PaginationDto<RecordsDocument>> {
     return this._recordsService.getAll(fileId);
   }
@@ -56,12 +56,12 @@ export class RecordsController {
   @HttpCode(HttpStatus.OK)
   @Header(
     'Content-Type',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   )
   @Get('descargar-word/:recordId')
   async generateWordDocument(
     @Param('recordId') recordId: string,
-    @Res() res: Response,
+    @Res() res: Response
   ): Promise<any> {
     const buffer = await this._recordsService.generateWordDocument(recordId);
     return res.end(buffer, 'binary');

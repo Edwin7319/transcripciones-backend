@@ -13,11 +13,11 @@ const KEYS_TO_OMIT = ['createdAt', 'updatedAt', '__v'];
 export class LogService {
   constructor(
     @InjectModel(Log.name)
-    private readonly _logModel: Model<Log>,
+    private readonly _logModel: Model<Log>
   ) {}
 
   async getBySchema(
-    schemaType: ELogSchema,
+    schemaType: ELogSchema
   ): Promise<PaginationDto<LogDocument>> {
     try {
       const [response] = await this._logModel.aggregate([
@@ -50,7 +50,7 @@ export class LogService {
         const withoutKeys = (deepDiff.diff(d.previous, d.current) || []).filter(
           (dif) => {
             return !KEYS_TO_OMIT.includes(dif.path[0]);
-          },
+          }
         );
         return {
           ...d,

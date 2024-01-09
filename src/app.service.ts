@@ -10,7 +10,7 @@ import {
 export class AppService {
   constructor(
     private _health: HealthCheckService,
-    private _http: HttpHealthIndicator,
+    private _http: HttpHealthIndicator
   ) {}
 
   @HealthCheck()

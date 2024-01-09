@@ -1,15 +1,11 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateRecordDto {
+export class SignInUserDto {
   @IsNotEmpty()
   @IsString()
-  text: string;
+  email: string;
 
   @IsNotEmpty()
   @IsString()
-  name: string;
-
-  @IsNotEmpty()
-  @IsString()
-  fileId: string;
+  password: string;
 }
