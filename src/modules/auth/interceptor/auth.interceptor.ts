@@ -17,6 +17,11 @@ export class AuthInterceptor implements NestInterceptor {
   ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
+    const isLoginRoute = request.path.includes('login');
+
+    if (isLoginRoute) {
+      return next.handle();
+    }
 
     const token = request.headers.authorization?.split(' ')[1];
 
