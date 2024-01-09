@@ -22,12 +22,12 @@ export class TranscriptionFileService {
     private readonly _transcriptionFileMode: Model<TranscriptionFile>,
     @InjectModel(Log.name)
     private readonly _logModel: Model<Log>,
-    private readonly _configService: ConfigService,
+    private readonly _configService: ConfigService
   ) {}
 
   async saveTranscriptionFiles(
     audioRecordingId: string,
-    fileName = '',
+    fileName = ''
   ): Promise<TranscriptionFileDocument> {
     const transcription = await this.getTranscription(audioRecordingId);
 
@@ -39,15 +39,15 @@ export class TranscriptionFileService {
       const transcription = await this.readFile(
         this._configService
           .get<string>('file.transcriptionPath')
-          .replace(':fileName', fileName),
+          .replace(':fileName', fileName)
       );
       const transcriptionLocation = await this.readFile(
         this._configService
           .get<string>('file.transcriptionLocationPath')
-          .replace(':fileName', fileName),
+          .replace(':fileName', fileName)
       );
       const transcriptionArray = this.transformTextLocationToObjects(
-        transcriptionLocation,
+        transcriptionLocation
       );
 
       return this._transcriptionFileMode.create({
@@ -64,7 +64,7 @@ export class TranscriptionFileService {
   }
 
   async getTranscription(
-    audioRecordingId: string,
+    audioRecordingId: string
   ): Promise<TranscriptionFileDocument> {
     try {
       return this._transcriptionFileMode.findOne({
@@ -93,7 +93,7 @@ export class TranscriptionFileService {
     return fs.readFileSync(path, 'utf-8');
   }
   private transformTextLocationToObjects(
-    text: string,
+    text: string
   ): Array<TranscriptionLocationDto> {
     const lines = text.split(/\r\n\r\n/);
     const subtitleObjects: Array<TranscriptionLocationDto> = [];

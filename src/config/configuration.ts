@@ -14,4 +14,8 @@ export default () => ({
     transcriptionPath: process.env.PATH_FILE_TRANSCRIPTION,
     transcriptionLocationPath: process.env.PATH_FILE_TRANSCRIPTION_LOCATION,
   },
+  jwt: {
+    secretKey: process.env.JWT_SECRET_KEY,
+    expiration: process.env.JWT_EXPIRATION,
+  },
 });

@@ -22,7 +22,7 @@ export const AUDIO_MULTER: MulterOptions = {
         new BadRequestException({
           mensaje: 'No se ha enviado un formato de audio adecuado',
         }),
-        false,
+        false
       );
     }
   },

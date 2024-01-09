@@ -14,23 +14,23 @@ import { TranscriptionFileService } from './transcription-file.service';
 @Controller('transcripcion-archivo')
 export class TranscriptionFileController {
   constructor(
-    private readonly _transcriptionFileService: TranscriptionFileService,
+    private readonly _transcriptionFileService: TranscriptionFileService
   ) {}
 
   @HttpCode(HttpStatus.OK)
   @Get(':audioRecordingId')
   async saveTranscriptionFiles(
-    @Param('audioRecordingId') audioRecordingId: string,
+    @Param('audioRecordingId') audioRecordingId: string
   ): Promise<TranscriptionFileDocument> {
     return this._transcriptionFileService.saveTranscriptionFiles(
-      audioRecordingId,
+      audioRecordingId
     );
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('obtener-transcripcion/:audioRecordingId')
   async getTranscription(
-    @Param('audioRecordingId') audioRecordingId: string,
+    @Param('audioRecordingId') audioRecordingId: string
   ): Promise<TranscriptionFileDocument> {
     return this._transcriptionFileService.getTranscription(audioRecordingId);
   }
@@ -40,12 +40,11 @@ export class TranscriptionFileController {
   @Get('descargar-transcripcion/:audioRecordingId')
   async getTranscriptionFile(
     @Param('audioRecordingId') audioRecordingId: string,
-    @Res() res,
+    @Res() res
   ): Promise<TranscriptionFileDocument> {
-    const buffer =
-      await this._transcriptionFileService.getTranscriptionFile(
-        audioRecordingId,
-      );
+    const buffer = await this._transcriptionFileService.getTranscriptionFile(
+      audioRecordingId
+    );
     return res.type('txt').end(buffer, 'binary');
   }
 }

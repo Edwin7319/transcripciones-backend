@@ -20,22 +20,22 @@ export type LogDocument = HydratedDocument<Log>;
 @Schema({ timestamps: true, collection: 'Log' })
 export class Log {
   @Prop({ type: String, required: true })
-    action: string;
+  action: string;
 
   @Prop({ type: String, required: true })
-    schema: string;
+  schema: string;
 
   @Prop({ type: String, required: true })
-    user: string;
+  user: string;
 
-  @Prop({ type: Number, default: Util.getCurrentTimestamp })
+  @Prop({ type: Number, default: Util.getCurrentTimestamp() })
   creationTime: number;
 
   @Prop({ type: Object, required: false })
-    previous: any;
+  previous: any;
 
   @Prop({ type: Object, required: true })
-    current: any;
+  current: any;
 }
 
 export const LogSchema = SchemaFactory.createForClass(Log);

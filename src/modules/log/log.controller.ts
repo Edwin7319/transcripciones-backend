@@ -12,7 +12,7 @@ export class LogController {
   @HttpCode(HttpStatus.OK)
   @Get(':schemaType')
   getBySchema(
-    @Param('schemaType') schemaType: ELogSchema,
+    @Param('schemaType') schemaType: ELogSchema
   ): Promise<PaginationDto<LogDocument>> {
     return this._logService.getBySchema(schemaType);
   }
