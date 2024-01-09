@@ -9,7 +9,7 @@ export class CommandService {
     audioName: string,
     fileName: string,
     parameters = '',
-    enableSpawn = true,
+    enableSpawn = true
   ): Promise<{ message: string; output: string }> {
     return new Promise((res, rej) => {
       let commandFromEnvironmentVariable = 'ls ./';
@@ -60,7 +60,7 @@ export class CommandService {
           }
           // log the output received from the command
           res({ message: 'Command executed succesfully', output: output });
-        },
+        }
       );
     });
   }

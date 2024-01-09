@@ -5,6 +5,7 @@ import { LogModule } from '../modules/log/log.module';
 import { RecordsModule } from '../modules/records/records.module';
 import { RoleModule } from '../modules/role/role.module';
 import { TranscriptionFileModule } from '../modules/transcription-file/transcription-file.module';
+import { UserModule } from '../modules/user/user.module';
 
 export const APP_MODULES = [
   AudioRecordingModule,
@@ -14,4 +15,5 @@ export const APP_MODULES = [
   LogModule,
   AuthModule,
   RoleModule,
+  UserModule,
 ];

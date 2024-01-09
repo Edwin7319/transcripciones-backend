@@ -7,7 +7,7 @@ export class RolGuard implements CanActivate {
   constructor(private _reflector: Reflector) {}
 
   canActivate(
-    context: ExecutionContext,
+    context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
     const roles = this._reflector.get<string[]>('roles', context.getHandler());
 

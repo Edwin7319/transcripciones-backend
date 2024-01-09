@@ -10,5 +10,5 @@ export const Auth = (...roles: RolesType[]) =>
   applyDecorators(
     Roles(...roles),
     UseGuards(JwtAuthGuard, RolGuard),
-    ApiBearerAuth(),
+    ApiBearerAuth()
   );

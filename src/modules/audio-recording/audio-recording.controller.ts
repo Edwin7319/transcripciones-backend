@@ -32,12 +32,12 @@ export class AudioRecordingController {
   @UseInterceptors(
     FileInterceptor('audio', {
       ...AUDIO_MULTER,
-    }),
+    })
   )
   @Post()
   async create(
     @UploadedFile() file: Express.Multer.File,
-    @Body() data: CreateAudioRecordingDto,
+    @Body() data: CreateAudioRecordingDto
   ): Promise<AudioRecordingDocument> {
     return this._audioRecordingService.executeAudioProcess(data, file);
   }
@@ -46,7 +46,7 @@ export class AudioRecordingController {
   @Put(':id')
   async edit(
     @Body() data: UpdateAudioRecordingDto,
-    @Param('id') id: string,
+    @Param('id') id: string
   ): Promise<AudioRecordingDocument> {
     return this._audioRecordingService.update(id, data);
   }
@@ -75,7 +75,7 @@ export class AudioRecordingController {
   @Get(':filename')
   serveAudioFile(
     @Param('filename') filename: string,
-    @Res() res: Response,
+    @Res() res: Response
   ): void {
     res.sendFile(filename, { root: 'public/audio-copy' });
   }

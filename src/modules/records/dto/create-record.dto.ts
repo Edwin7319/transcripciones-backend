@@ -3,13 +3,13 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class CreateRecordDto {
   @IsNotEmpty()
   @IsString()
-    text: string;
+  text: string;
 
   @IsNotEmpty()
   @IsString()
-    name: string;
+  name: string;
 
   @IsNotEmpty()
   @IsString()
-    fileId: string;
+  fileId: string;
 }

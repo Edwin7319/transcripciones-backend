@@ -29,12 +29,12 @@ export class AudioRecordingService {
     private readonly _logModel: Model<Log>,
     private readonly _configService: ConfigService,
     private readonly _transcriptionFileService: TranscriptionFileService,
-    private readonly _commandService: CommandService,
+    private readonly _commandService: CommandService
   ) {}
 
   async executeAudioProcess(
     data: CreateAudioRecordingDto,
-    file: Express.Multer.File,
+    file: Express.Multer.File
   ): Promise<AudioRecordingDocument> {
     let audioId = '';
     try {
@@ -49,7 +49,7 @@ export class AudioRecordingService {
       const [fileDocument] = await Promise.all([
         this._transcriptionFileService.saveTranscriptionFiles(
           audioId,
-          fileName,
+          fileName
         ),
         this.update(audioId, {
           status: EAudioRecordingStatus.COMPLETED,
@@ -76,7 +76,7 @@ export class AudioRecordingService {
 
   private async createAudioFileInformation(
     data: CreateAudioRecordingDto,
-    file: Express.Multer.File,
+    file: Express.Multer.File
   ): Promise<{ originalname: string; newAudioFile: AudioRecordingDocument }> {
     const { originalname, path, destination, size } = file;
 
@@ -146,7 +146,7 @@ export class AudioRecordingService {
 
   async update(
     id: string,
-    data: UpdateAudioRecordingDto,
+    data: UpdateAudioRecordingDto
   ): Promise<AudioRecordingDocument> {
     try {
       const currentRecording = await this.getById(id);
