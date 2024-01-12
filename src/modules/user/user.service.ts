@@ -11,6 +11,10 @@ import { Model } from 'mongoose';
 
 import { Util } from '../../utils/Util';
 import { SignInUserDto } from '../auth/dto/sign-in-user.dto';
+import {
+  RecoverPasswordDto,
+  UpdatePasswordDto,
+} from '../auth/dto/update-password.dto';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { EPasswordStatus, User, UserDocument } from './user.schema';
@@ -32,9 +36,9 @@ export class UserService {
     }
 
     try {
-      const password = Util.generateGenericPassword(); // E0VYs+RC
-      const salt = genSaltSync(10);
-      const encryptPassword = hashSync(password, salt);
+      const encryptPassword = this.generateEncryptedPass(
+        Util.generateGenericPassword()
+      );
 
       return this._userModel.create({
         ...data,
@@ -61,14 +65,66 @@ export class UserService {
 
     if (!matchCode) {
       throw new NotFoundException({
-        message: 'Error en las credenciales enviadas',
+        message: 'Credenciales no validas',
       });
     }
 
     return user;
   }
 
+  async updatePassword(data: UpdatePasswordDto): Promise<UserDocument> {
+    const { password, email, newPassword } = data;
+    const user = await this.login({
+      password,
+      email,
+    });
+    const encryptPassword = this.generateEncryptedPass(newPassword);
+
+    await this._userModel.updateOne(
+      {
+        _id: user._id,
+      },
+      {
+        password: encryptPassword,
+        passwordStatus: EPasswordStatus.VALIDATED,
+      }
+    );
+
+    return user;
+  }
+
+  async recoveryPassword(data: RecoverPasswordDto): Promise<UserDocument> {
+    const user = await this.getByEmail(data.email);
+
+    if (!user) {
+      throw new NotFoundException({
+        message: 'El correo no se encuentra registrado',
+      });
+    }
+
+    const encryptPassword = this.generateEncryptedPass(
+      'test12345' || Util.generateGenericPassword()
+    );
+
+    await this._userModel.updateOne(
+      {
+        _id: user._id,
+      },
+      {
+        password: encryptPassword,
+        passwordStatus: EPasswordStatus.GENERATED,
+      }
+    );
+
+    return user;
+  }
+
   private getByEmail(email: string): Promise<UserDocument> {
     return this._userModel.findOne({ email }).exec();
+  }
+
+  private generateEncryptedPass(password: string): string {
+    const salt = genSaltSync(10);
+    return hashSync(password, salt);
   }
 }
