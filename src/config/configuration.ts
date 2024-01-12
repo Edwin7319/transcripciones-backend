@@ -18,4 +18,8 @@ export default () => ({
     secretKey: process.env.JWT_SECRET_KEY,
     expiration: process.env.JWT_EXPIRATION,
   },
+  email: {
+    sender: process.env.EMAIL_SENDER,
+    password: process.env.EMAIL_PASSWORD,
+  },
 });
