@@ -39,7 +39,8 @@ export class AuthService {
 
   private async generateToken(user: UserDocument): Promise<string> {
     return this._jwtService.signAsync({
-      name: user.name,
+      _id: user._id,
+      name: `${user.name} ${user.lastName}`,
       email: user.email,
       roles: user.roles,
     });

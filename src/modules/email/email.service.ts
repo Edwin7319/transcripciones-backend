@@ -13,13 +13,16 @@ interface IEjsEmail<T = any> {
   params: T;
 }
 
-interface IRecoveryPasswordEmail {
-  company: string;
+interface IBaseEmail {
   name: string;
   lastName: string;
   password: string;
   email: string;
 }
+
+type IRecoveryPasswordEmail = IBaseEmail;
+
+type IRegisterUser = IBaseEmail;
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -53,10 +56,8 @@ export class EmailService implements OnModuleInit {
       service: 'gmail',
       secure: true,
       auth: {
-        user:
-          'edwin.paul.73@gmail.com' || this._configService.get('email.sender'),
-        pass:
-          'mlew cvwj pddw uvkc' || this._configService.get('email.password'),
+        user: this._configService.get('email.sender'),
+        pass: this._configService.get('email.password'),
       },
       tls: {
         rejectUnauthorized: false,
@@ -71,12 +72,36 @@ export class EmailService implements OnModuleInit {
       return this.sendEmailWithTemplate(
         {
           to: [data.email],
-          subject: 'Recupear contraseña',
+          subject: 'Recuperar contraseña',
         },
         {
           path: path.join(__dirname, `../../${EViews.RECOVERY_PASSWORD}`),
           params: {
             ...data,
+            company: this._configService.get('email.companyName'),
+            supportEmail: this._configService.get('email.support'),
+          },
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async sendRegisterUser(data: IRegisterUser): Promise<boolean> {
+    try {
+      return this.sendEmailWithTemplate(
+        {
+          to: [data.email],
+          subject: 'Registro de usuario',
+        },
+        {
+          path: path.join(__dirname, `../../${EViews.REGISTER_USER}`),
+          params: {
+            ...data,
+            company: this._configService.get('email.companyName'),
+            supportEmail: this._configService.get('email.support'),
+            appUrl: this._configService.get('email.appUrl'),
           },
         }
       );

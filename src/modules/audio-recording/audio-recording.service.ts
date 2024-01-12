@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as fs from 'fs-extra';
+import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 
 import { PaginationDto } from '../../shared/pagination.dto';
@@ -9,6 +10,7 @@ import { Util } from '../../utils/Util';
 import { CommandService } from '../commands/command.service';
 import { ELogAction, ELogSchema, Log } from '../log/log.schema';
 import { TranscriptionFileService } from '../transcription-file/transcription-file.service';
+import { UserDocument } from '../user/user.schema';
 
 import {
   AudioRecording,
@@ -34,12 +36,13 @@ export class AudioRecordingService {
 
   async executeAudioProcess(
     data: CreateAudioRecordingDto,
-    file: Express.Multer.File
+    file: Express.Multer.File,
+    user: Partial<UserDocument>
   ): Promise<AudioRecordingDocument> {
     let audioId = '';
     try {
       const { originalname, newAudioFile } =
-        await this.createAudioFileInformation(data, file);
+        await this.createAudioFileInformation(data, file, `${user._id}`);
 
       audioId = newAudioFile._id.toString();
 
@@ -76,7 +79,8 @@ export class AudioRecordingService {
 
   private async createAudioFileInformation(
     data: CreateAudioRecordingDto,
-    file: Express.Multer.File
+    file: Express.Multer.File,
+    userId: string
   ): Promise<{ originalname: string; newAudioFile: AudioRecordingDocument }> {
     const { originalname, path, destination, size } = file;
 
@@ -93,6 +97,7 @@ export class AudioRecordingService {
       creationTime: Util.getCurrentTimestamp(),
       duration: parseFloat(data.duration),
       status: EAudioRecordingStatus.CREATED,
+      user: new ObjectId(userId),
       path,
       destination,
       size,
@@ -114,12 +119,21 @@ export class AudioRecordingService {
     };
   }
 
-  async getAll(): Promise<PaginationDto<AudioRecordingDocument>> {
+  async getAll(
+    user: Partial<UserDocument>
+  ): Promise<PaginationDto<AudioRecordingDocument>> {
     try {
       const [response] = await this._audioRecordingModel.aggregate([
         {
           $match: {
-            status: EAudioRecordingStatus.COMPLETED,
+            $and: [
+              {
+                status: EAudioRecordingStatus.COMPLETED,
+              },
+              {
+                user: new ObjectId(user._id),
+              },
+            ],
           },
         },
         {
