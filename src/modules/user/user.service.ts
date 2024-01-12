@@ -15,6 +15,7 @@ import {
   RecoverPasswordDto,
   UpdatePasswordDto,
 } from '../auth/dto/update-password.dto';
+import { EmailService } from '../email/email.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { EPasswordStatus, User, UserDocument } from './user.schema';
@@ -23,7 +24,8 @@ import { EPasswordStatus, User, UserDocument } from './user.schema';
 export class UserService {
   constructor(
     @InjectModel(User.name)
-    private readonly _userModel: Model<User>
+    private readonly _userModel: Model<User>,
+    private readonly _emailService: EmailService
   ) {}
 
   async register(data: CreateUserDto): Promise<UserDocument> {
@@ -102,19 +104,29 @@ export class UserService {
       });
     }
 
-    const encryptPassword = this.generateEncryptedPass(
-      'test12345' || Util.generateGenericPassword()
-    );
+    const password = Util.generateGenericPassword();
+    const encryptPassword = this.generateEncryptedPass(password);
 
-    await this._userModel.updateOne(
-      {
-        _id: user._id,
-      },
-      {
-        password: encryptPassword,
-        passwordStatus: EPasswordStatus.GENERATED,
-      }
-    );
+    const { name, email, lastName } = user;
+
+    await Promise.all([
+      this._emailService.sendRecoveryPassword({
+        company: 'Company name',
+        lastName,
+        name,
+        email,
+        password,
+      }),
+      this._userModel.updateOne(
+        {
+          _id: user._id,
+        },
+        {
+          password: encryptPassword,
+          passwordStatus: EPasswordStatus.GENERATED,
+        }
+      ),
+    ]);
 
     return user;
   }
