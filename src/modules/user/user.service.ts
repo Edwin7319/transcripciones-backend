@@ -9,6 +9,8 @@ import { compare, genSaltSync, hashSync } from 'bcrypt';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 
+import { EStatus } from '../../shared/enum';
+import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
 import { SignInUserDto } from '../auth/dto/sign-in-user.dto';
 import {
@@ -16,6 +18,7 @@ import {
   UpdatePasswordDto,
 } from '../auth/dto/update-password.dto';
 import { EmailService } from '../email/email.service';
+import { Role, RoleDocument } from '../role/role.schema';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { EPasswordStatus, User, UserDocument } from './user.schema';
@@ -25,6 +28,8 @@ export class UserService {
   constructor(
     @InjectModel(User.name)
     private readonly _userModel: Model<User>,
+    @InjectModel(Role.name)
+    private readonly _roleModel: Model<Role>,
     private readonly _emailService: EmailService
   ) {}
 
@@ -38,16 +43,24 @@ export class UserService {
     }
 
     try {
-      const encryptPassword = this.generateEncryptedPass(
-        Util.generateGenericPassword()
-      );
+      const password = Util.generateGenericPassword();
+      const encryptPassword = this.generateEncryptedPass(password);
 
-      return this._userModel.create({
+      const user = await this._userModel.create({
         ...data,
         password: encryptPassword,
         passwordStatus: EPasswordStatus.GENERATED,
         roles: data.roles.map((r) => new ObjectId(r)),
       });
+
+      await this._emailService.sendRegisterUser({
+        email: user.email,
+        lastName: user.lastName,
+        name: user.name,
+        password,
+      });
+
+      return user;
     } catch (e) {
       throw new InternalServerErrorException({
         message: 'Error al registrar usuario',
@@ -63,6 +76,14 @@ export class UserService {
         message: 'No se encontró al usuario',
       });
     }
+
+    if (user.status === EStatus.DISABLED) {
+      throw new NotFoundException({
+        message:
+          'El usuario se encuentra deshabilitado, por favor comuníquese con un admistrador',
+      });
+    }
+
     const matchCode = await compare(data.password, user.password);
 
     if (!matchCode) {
@@ -104,6 +125,13 @@ export class UserService {
       });
     }
 
+    if (user.status === EStatus.DISABLED) {
+      throw new NotFoundException({
+        message:
+          'El usuario se encuentra deshabilitado, por favor comuníquese con un admistrador',
+      });
+    }
+
     const password = Util.generateGenericPassword();
     const encryptPassword = this.generateEncryptedPass(password);
 
@@ -111,7 +139,6 @@ export class UserService {
 
     await Promise.all([
       this._emailService.sendRecoveryPassword({
-        company: 'Company name',
         lastName,
         name,
         email,
@@ -129,6 +156,90 @@ export class UserService {
     ]);
 
     return user;
+  }
+
+  async getAll(): Promise<PaginationDto<UserDocument>> {
+    try {
+      const [response] = await this._userModel.aggregate([
+        {
+          $match: {
+            status: EStatus.ENABLED,
+          },
+        },
+        {
+          $lookup: {
+            from: 'Rol',
+            localField: 'roles',
+            foreignField: '_id',
+            as: 'roles',
+          },
+        },
+        {
+          $unwind: {
+            path: '$roles',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              _id: '$_id',
+              name: '$name',
+              lastName: '$lastName',
+              email: '$email',
+              status: '$status',
+              password: '$password',
+              passwordStatus: '$passwordStatus',
+              creationTime: '$creationTime',
+            },
+            roles: {
+              $push: '$roles',
+            },
+          },
+        },
+        {
+          $addFields: {
+            _id: '$_id._id',
+            name: '$_id.name',
+            lastName: '$_id.lastName',
+            email: '$_id.email',
+            status: '$_id.status',
+            password: '$_id.password',
+            passwordStatus: '$_id.passwordStatus',
+            creationTime: '$_id.creationTime',
+          },
+        },
+        {
+          $sort: { _id: -1 },
+        },
+        {
+          $facet: {
+            data: [{ $skip: (1 - 1) * 10 }, { $limit: 9999 }],
+            metadata: [
+              { $count: 'total' },
+              { $addFields: { page: 1, limit: 10 } },
+            ],
+          },
+        },
+      ]);
+
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException({
+        message: 'Error al obtener todos los usuarios',
+      });
+    }
+  }
+
+  async getAllRoles(): Promise<Array<RoleDocument>> {
+    try {
+      return this._roleModel.find().exec();
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Error al obtener todos los roles',
+      });
+    }
   }
 
   private getByEmail(email: string): Promise<UserDocument> {

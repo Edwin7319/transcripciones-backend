@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -37,9 +38,14 @@ export class AudioRecordingController {
   @Post()
   async create(
     @UploadedFile() file: Express.Multer.File,
-    @Body() data: CreateAudioRecordingDto
+    @Body() data: CreateAudioRecordingDto,
+    @Req() req
   ): Promise<AudioRecordingDocument> {
-    return this._audioRecordingService.executeAudioProcess(data, file);
+    return this._audioRecordingService.executeAudioProcess(
+      data,
+      file,
+      req.user
+    );
   }
 
   @HttpCode(HttpStatus.OK)
@@ -53,8 +59,8 @@ export class AudioRecordingController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getAll(): Promise<PaginationDto<AudioRecordingDocument>> {
-    return this._audioRecordingService.getAll();
+  async getAll(@Req() req): Promise<PaginationDto<AudioRecordingDocument>> {
+    return this._audioRecordingService.getAll(req.user);
   }
 
   @HttpCode(HttpStatus.OK)

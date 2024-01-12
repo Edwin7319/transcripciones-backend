@@ -21,5 +21,8 @@ export default () => ({
   email: {
     sender: process.env.EMAIL_SENDER,
     password: process.env.EMAIL_PASSWORD,
+    support: process.env.EMAIL_SUPPORT,
+    appUrl: process.env.EMAIL_APP_URL,
+    companyName: process.env.EMAIL_COMPANY_NAME,
   },
 });
