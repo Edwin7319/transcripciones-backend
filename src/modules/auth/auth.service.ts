@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserDocument } from '../user/user.schema';
 import { UserService } from '../user/user.service';
 
 import { SignInUserDto } from './dto/sign-in-user.dto';
+import {
+  RecoverPasswordDto,
+  UpdatePasswordDto,
+} from './dto/update-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,9 +27,20 @@ export class AuthService {
     };
   }
 
-  async generateToken(user: UserDocument): Promise<string> {
+  async updatePassword(data: UpdatePasswordDto): Promise<boolean> {
+    await this._userService.updatePassword(data);
+    return true;
+  }
+
+  async recoveryPassword(data: RecoverPasswordDto): Promise<boolean> {
+    await this._userService.recoveryPassword(data);
+    return true;
+  }
+
+  private async generateToken(user: UserDocument): Promise<string> {
     return this._jwtService.signAsync({
-      name: user.name,
+      _id: user._id,
+      name: `${user.name} ${user.lastName}`,
       email: user.email,
       roles: user.roles,
     });
