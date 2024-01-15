@@ -17,7 +17,10 @@ export class AuthInterceptor implements NestInterceptor {
   ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const isLoginRoute = request.path.includes('auth');
+    const publicRoutes = ['reproducir', 'auth'];
+    const isLoginRoute = publicRoutes.some((route) =>
+      request.path.includes(route)
+    );
 
     if (isLoginRoute) {
       return next.handle();
