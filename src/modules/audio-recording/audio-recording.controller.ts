@@ -78,7 +78,7 @@ export class AudioRecordingController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':filename')
+  @Get('reproducir/:filename')
   serveAudioFile(
     @Param('filename') filename: string,
     @Res() res: Response
