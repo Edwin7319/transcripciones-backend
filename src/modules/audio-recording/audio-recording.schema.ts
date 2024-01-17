@@ -5,7 +5,8 @@ import { User } from '../user/user.schema';
 
 export enum EAudioRecordingStatus {
   CREATED = 'CREADO',
-  COMPLETED = 'COMPLETO',
+  PENDING = 'PENDIENTE DE PROCESAMIENTO',
+  PROCESSED = 'PROCESADO',
   ERROR = 'ERROR',
 }
 

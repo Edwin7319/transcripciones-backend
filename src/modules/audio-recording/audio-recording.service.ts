@@ -55,7 +55,7 @@ export class AudioRecordingService {
           fileName
         ),
         this.update(audioId, {
-          status: EAudioRecordingStatus.COMPLETED,
+          status: EAudioRecordingStatus.PROCESSED,
         }),
       ]);
 
@@ -128,7 +128,7 @@ export class AudioRecordingService {
           $match: {
             $and: [
               {
-                status: EAudioRecordingStatus.COMPLETED,
+                status: EAudioRecordingStatus.PROCESSED,
               },
               {
                 user: new ObjectId(user._id),
