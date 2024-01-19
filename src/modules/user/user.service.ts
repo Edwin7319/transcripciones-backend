@@ -92,7 +92,8 @@ export class UserService {
       });
     }
 
-    return user;
+    const userPopulated = await this.getAll(user._id.toString());
+    return userPopulated.data[0];
   }
 
   async updatePassword(data: UpdatePasswordDto): Promise<UserDocument> {
@@ -236,7 +237,6 @@ export class UserService {
 
       return response;
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException({
         message: 'Error al obtener todos los usuarios',
       });
