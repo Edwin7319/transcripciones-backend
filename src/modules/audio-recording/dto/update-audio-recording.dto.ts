@@ -9,5 +9,5 @@ export class UpdateAudioRecordingDto {
 
   @IsOptional()
   @IsString()
-  status?: EAudioRecordingStatus;
+  processStatus?: EAudioRecordingStatus;
 }

@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Req,
@@ -15,9 +16,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
 import { PaginationDto } from '../../shared/pagination.dto';
+import { TranscriptionFileDocument } from '../transcription-file/transcription-file.schema';
 
 import { AudioRecordingDocument } from './audio-recording.schema';
 import { AudioRecordingService } from './audio-recording.service';
@@ -35,11 +37,11 @@ export class AudioRecordingController {
       ...AUDIO_MULTER,
     })
   )
-  @Post()
+  @Post('cargar-audio')
   async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() data: CreateAudioRecordingDto,
-    @Req() req
+    @Req() req: Request
   ): Promise<AudioRecordingDocument> {
     return this._audioRecordingService.executeAudioProcess(
       data,
@@ -58,9 +60,17 @@ export class AudioRecordingController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get()
-  async getAll(@Req() req): Promise<PaginationDto<AudioRecordingDocument>> {
+  @Get('por-usuario')
+  async getAllByUser(
+    @Req() req: Request
+  ): Promise<PaginationDto<AudioRecordingDocument>> {
     return this._audioRecordingService.getAll(req.user);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('todos')
+  async getAllByAdmin(): Promise<PaginationDto<AudioRecordingDocument>> {
+    return this._audioRecordingService.getAll();
   }
 
   @HttpCode(HttpStatus.OK)
@@ -84,5 +94,19 @@ export class AudioRecordingController {
     @Res() res: Response
   ): void {
     res.sendFile(filename, { root: 'public/audio-copy' });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch('guardar-transcripcion')
+  saveFileTranscription(
+    @Body('audioId') audioId: string,
+    @Body('fileName') fileName: string,
+    @Req() res: Request
+  ): Promise<AudioRecordingDocument> {
+    return this._audioRecordingService.saveFileTranscription(
+      audioId,
+      fileName,
+      res.user
+    );
   }
 }
