@@ -69,7 +69,7 @@ export class UserService {
   }
 
   async login(data: SignInUserDto): Promise<UserDocument> {
-    const user = await this.getByEmail(data.email);
+    const user = await this.getActiveUserByEmail(data.email);
 
     if (!user) {
       throw new NotFoundException({
@@ -158,12 +158,21 @@ export class UserService {
     return user;
   }
 
-  async getAll(): Promise<PaginationDto<UserDocument>> {
+  async getAll(id?: string): Promise<PaginationDto<UserDocument>> {
     try {
+      const andQuery = [];
+
+      andQuery.push({});
+      if (id) {
+        andQuery.push({
+          _id: new ObjectId(id),
+        });
+      }
+
       const [response] = await this._userModel.aggregate([
         {
           $match: {
-            status: EStatus.ENABLED,
+            $and: andQuery,
           },
         },
         {
@@ -245,9 +254,29 @@ export class UserService {
   private getByEmail(email: string): Promise<UserDocument> {
     return this._userModel.findOne({ email }).exec();
   }
+  private getActiveUserByEmail(email: string): Promise<UserDocument> {
+    return this._userModel.findOne({ email, status: EStatus.ENABLED }).exec();
+  }
 
   private generateEncryptedPass(password: string): string {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
+  }
+
+  async updateStatus(id: string, status: string): Promise<UserDocument> {
+    try {
+      await this._userModel.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          status,
+        }
+      );
+      const response = await this.getAll(id);
+      return response.data[0];
+    } catch (e) {
+      throw new InternalServerErrorException({
+        message: 'Error al actualizar estado de usuario',
+      });
+    }
   }
 }
