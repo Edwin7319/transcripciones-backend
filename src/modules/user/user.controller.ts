@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Put,
 } from '@nestjs/common';
 
 import { PaginationDto } from '../../shared/pagination.dto';
@@ -34,5 +36,14 @@ export class UserController {
   @Get('roles')
   getAllRoles(): Promise<Array<RoleDocument>> {
     return this._userService.getAllRoles();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put('actualizar-estado/:id')
+  updateStatus(
+    @Body('status') status: string,
+    @Param('id') id: string
+  ): Promise<UserDocument> {
+    return this._userService.updateStatus(id, status);
   }
 }
