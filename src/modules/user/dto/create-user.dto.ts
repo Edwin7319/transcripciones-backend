@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsString, Matches } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 import { REGEX_EMAIL } from '../../../constants/constants';
 
@@ -10,6 +16,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   lastName: string;
+
+  @IsOptional()
+  @IsString()
+  institution: string;
 
   @IsNotEmpty()
   @Matches(REGEX_EMAIL)

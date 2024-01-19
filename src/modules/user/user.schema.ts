@@ -33,6 +33,9 @@ export class User {
   @Prop({ type: String, required: true })
   passwordStatus: EPasswordStatus;
 
+  @Prop({ type: String, required: false })
+  institution: string;
+
   @Prop({
     type: [
       {

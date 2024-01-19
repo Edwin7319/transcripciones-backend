@@ -5,7 +5,8 @@ import { User } from '../user/user.schema';
 
 export enum EAudioRecordingStatus {
   CREATED = 'CREADO',
-  COMPLETED = 'COMPLETO',
+  PENDING = 'PENDIENTE DE PROCESAMIENTO',
+  PROCESSED = 'PROCESADO',
   ERROR = 'ERROR',
 }
 
@@ -44,7 +45,7 @@ export class AudioRecording {
   duration: number;
 
   @Prop({ type: String, required: true })
-  status: EAudioRecordingStatus;
+  processStatus: EAudioRecordingStatus;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
