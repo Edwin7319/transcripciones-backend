@@ -63,7 +63,6 @@ export class LogService {
         data,
       };
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException({
         message: 'Error al obtener todos los datos de auditoria',
       });
