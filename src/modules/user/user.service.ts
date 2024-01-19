@@ -200,6 +200,7 @@ export class UserService {
               password: '$password',
               passwordStatus: '$passwordStatus',
               creationTime: '$creationTime',
+              institution: '$institution',
             },
             roles: {
               $push: '$roles',
@@ -216,6 +217,7 @@ export class UserService {
             password: '$_id.password',
             passwordStatus: '$_id.passwordStatus',
             creationTime: '$_id.creationTime',
+            institution: '$_id.institution',
           },
         },
         {
