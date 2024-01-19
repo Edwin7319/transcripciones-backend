@@ -13,19 +13,19 @@ import {
   Req,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
 
 import { PaginationDto } from '../../shared/pagination.dto';
-import { TranscriptionFileDocument } from '../transcription-file/transcription-file.schema';
 
 import { AudioRecordingDocument } from './audio-recording.schema';
 import { AudioRecordingService } from './audio-recording.service';
 import { CreateAudioRecordingDto } from './dto/create-audio-recording.dto';
 import { UpdateAudioRecordingDto } from './dto/update-audio-recording.dto';
-import { AUDIO_MULTER } from './multer/multer';
+import { AUDIO_MULTER, TRANSCRIPTION_MULTER } from './multer/multer';
 
 @Controller('registro-de-audio')
 export class AudioRecordingController {
@@ -97,16 +97,21 @@ export class AudioRecordingController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FilesInterceptor('transcription', 2, {
+      ...TRANSCRIPTION_MULTER,
+    })
+  )
   @Patch('guardar-transcripcion')
   saveFileTranscription(
+    @UploadedFiles() files: Array<Express.Multer.File>,
     @Body('audioId') audioId: string,
-    @Body('fileName') fileName: string,
     @Req() res: Request
   ): Promise<AudioRecordingDocument> {
     return this._audioRecordingService.saveFileTranscription(
       audioId,
-      fileName,
-      res.user
+      res.user,
+      files
     );
   }
 }

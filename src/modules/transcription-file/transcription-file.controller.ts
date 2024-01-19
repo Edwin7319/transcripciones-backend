@@ -18,16 +18,6 @@ export class TranscriptionFileController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
-  @Get(':audioRecordingId')
-  async saveTranscriptionFiles(
-    @Param('audioRecordingId') audioRecordingId: string
-  ): Promise<TranscriptionFileDocument> {
-    return this._transcriptionFileService.saveTranscriptionFiles(
-      audioRecordingId
-    );
-  }
-
-  @HttpCode(HttpStatus.OK)
   @Get('obtener-transcripcion/:audioRecordingId')
   async getTranscription(
     @Param('audioRecordingId') audioRecordingId: string

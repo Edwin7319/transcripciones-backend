@@ -27,7 +27,7 @@ export class TranscriptionFileService {
 
   async saveTranscriptionFiles(
     audioRecordingId: string,
-    fileName = ''
+    files: Array<Express.Multer.File>
   ): Promise<TranscriptionFileDocument> {
     const transcription = await this.getTranscription(audioRecordingId);
 
@@ -35,17 +35,23 @@ export class TranscriptionFileService {
       return transcription;
     }
 
+    const fileWithText = files.map((file) => {
+      return {
+        ...file,
+        text: file.buffer.toString('utf8'),
+        fileType: file.originalname.split('.')[1],
+      };
+    });
+
+    const transcriptionFile = fileWithText.find((f) => f.fileType === 'txt');
+    const transcriptionLocationFile = fileWithText.find(
+      (f) => f.fileType === 'srt'
+    );
+
     try {
-      const transcription = await this.readFile(
-        this._configService
-          .get<string>('file.transcriptionPath')
-          .replace(':fileName', fileName)
-      );
-      const transcriptionLocation = await this.readFile(
-        this._configService
-          .get<string>('file.transcriptionLocationPath')
-          .replace(':fileName', fileName)
-      );
+      const transcription = transcriptionFile.text;
+      const transcriptionLocation = transcriptionLocationFile.text;
+
       const transcriptionArray = this.transformTextLocationToObjects(
         transcriptionLocation
       );
