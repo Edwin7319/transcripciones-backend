@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import * as fs from 'fs-extra';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 
 import * as process from 'process';
 
@@ -43,4 +43,11 @@ export const AUDIO_MULTER: MulterOptions = {
       cb(null, file.originalname);
     },
   }),
+};
+
+export const TRANSCRIPTION_MULTER: MulterOptions = {
+  limits: {
+    fileSize: 20 * 1024 * 1024,
+  },
+  storage: memoryStorage(),
 };

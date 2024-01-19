@@ -234,14 +234,14 @@ export class AudioRecordingService {
 
   async saveFileTranscription(
     audioId: string,
-    fileName: string,
-    user: Partial<UserDocument>
+    user: Partial<UserDocument>,
+    files: Array<Express.Multer.File>
   ): Promise<AudioRecordingDocument> {
     try {
       const fileDocument =
         await this._transcriptionFileService.saveTranscriptionFiles(
           audioId,
-          fileName
+          files
         );
 
       await this.update(audioId, {
