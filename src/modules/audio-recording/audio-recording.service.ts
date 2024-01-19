@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as fs from 'fs-extra';
@@ -9,6 +13,7 @@ import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
 import { CommandService } from '../commands/command.service';
 import { ELogAction, ELogSchema, Log } from '../log/log.schema';
+import { TranscriptionFileDocument } from '../transcription-file/transcription-file.schema';
 import { TranscriptionFileService } from '../transcription-file/transcription-file.service';
 import { UserDocument } from '../user/user.schema';
 
@@ -40,36 +45,36 @@ export class AudioRecordingService {
     user: Partial<UserDocument>
   ): Promise<AudioRecordingDocument> {
     let audioId = '';
+
+    const existAudioName = await this._audioRecordingModel
+      .findOne({
+        name: new RegExp(`^${data.name}$`, 'i'),
+      })
+      .exec();
+
+    if (existAudioName) {
+      throw new ConflictException({
+        message: 'Nombre de audio ya se encuentra registrado',
+      });
+    }
+
     try {
-      const { originalname, newAudioFile } =
-        await this.createAudioFileInformation(data, file, `${user._id}`);
+      const { newAudioFile } = await this.createAudioFileInformation(
+        data,
+        file,
+        user
+      );
 
       audioId = newAudioFile._id.toString();
-
-      const fileName = originalname.split('.')[0];
-      await this._commandService.executeCommand(originalname, fileName);
-
-      const [fileDocument] = await Promise.all([
-        this._transcriptionFileService.saveTranscriptionFiles(
-          audioId,
-          fileName
-        ),
-        this.update(audioId, {
-          status: EAudioRecordingStatus.PROCESSED,
-        }),
-      ]);
-
-      this._logModel.create({
-        user: 'Edwin',
-        schema: ELogSchema.TRANSCRIPTION_FILE,
-        action: ELogAction.CREATE,
-        current: fileDocument,
+      await this.update(audioId, {
+        processStatus: EAudioRecordingStatus.PENDING,
       });
 
-      return newAudioFile;
+      return this._audioRecordingModel.findById(audioId);
+      // await this._commandService.executeCommand(originalname, fileName);
     } catch (error) {
       await this.update(audioId, {
-        status: EAudioRecordingStatus.ERROR,
+        processStatus: EAudioRecordingStatus.ERROR,
       });
       throw new InternalServerErrorException({
         message: 'Error al crear registro de audio',
@@ -80,7 +85,7 @@ export class AudioRecordingService {
   private async createAudioFileInformation(
     data: CreateAudioRecordingDto,
     file: Express.Multer.File,
-    userId: string
+    user: Partial<UserDocument>
   ): Promise<{ originalname: string; newAudioFile: AudioRecordingDocument }> {
     const { originalname, path, destination, size } = file;
 
@@ -96,8 +101,8 @@ export class AudioRecordingService {
       originalName: originalname,
       creationTime: Util.getCurrentTimestamp(),
       duration: parseFloat(data.duration),
-      status: EAudioRecordingStatus.CREATED,
-      user: new ObjectId(userId),
+      processStatus: EAudioRecordingStatus.CREATED,
+      user: new ObjectId(user._id),
       path,
       destination,
       size,
@@ -107,7 +112,7 @@ export class AudioRecordingService {
     });
 
     this._logModel.create({
-      user: 'Edwin',
+      user: user.name,
       schema: ELogSchema.AUDIO_RECORDING,
       action: ELogAction.CREATE,
       current: newAudioFile,
@@ -120,20 +125,29 @@ export class AudioRecordingService {
   }
 
   async getAll(
-    user: Partial<UserDocument>
+    user?: Partial<UserDocument>
   ): Promise<PaginationDto<AudioRecordingDocument>> {
     try {
       const [response] = await this._audioRecordingModel.aggregate([
         {
           $match: {
-            $and: [
-              {
-                status: EAudioRecordingStatus.PROCESSED,
-              },
-              {
-                user: new ObjectId(user._id),
-              },
-            ],
+            ...(user && {
+              user: new ObjectId(user._id),
+            }),
+          },
+        },
+        {
+          $lookup: {
+            from: 'Usuario',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
@@ -214,6 +228,40 @@ export class AudioRecordingService {
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al descargar audio',
+      });
+    }
+  }
+
+  async saveFileTranscription(
+    audioId: string,
+    fileName: string,
+    user: Partial<UserDocument>
+  ): Promise<AudioRecordingDocument> {
+    try {
+      const fileDocument =
+        await this._transcriptionFileService.saveTranscriptionFiles(
+          audioId,
+          fileName
+        );
+
+      await this.update(audioId, {
+        processStatus: EAudioRecordingStatus.PROCESSED,
+      });
+
+      this._logModel.create({
+        user: user.name,
+        schema: ELogSchema.TRANSCRIPTION_FILE,
+        action: ELogAction.CREATE,
+        current: fileDocument,
+      });
+
+      return this._audioRecordingModel.findById(audioId);
+    } catch (e) {
+      await this.update(audioId, {
+        processStatus: EAudioRecordingStatus.ERROR,
+      });
+      throw new InternalServerErrorException({
+        message: 'Error al guardar transcripciones',
       });
     }
   }

@@ -45,7 +45,7 @@ export class AudioRecording {
   duration: number;
 
   @Prop({ type: String, required: true })
-  status: EAudioRecordingStatus;
+  processStatus: EAudioRecordingStatus;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
