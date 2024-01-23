@@ -5,8 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Req,
   Res,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 import { TranscriptionFileDocument } from './transcription-file.schema';
 import { TranscriptionFileService } from './transcription-file.service';
@@ -30,10 +32,12 @@ export class TranscriptionFileController {
   @Get('descargar-transcripcion/:audioRecordingId')
   async getTranscriptionFile(
     @Param('audioRecordingId') audioRecordingId: string,
-    @Res() res
-  ): Promise<TranscriptionFileDocument> {
+    @Res() res: Response,
+    @Req() req: Request
+  ) {
     const buffer = await this._transcriptionFileService.getTranscriptionFile(
-      audioRecordingId
+      audioRecordingId,
+      req.user
     );
     return res.type('txt').end(buffer, 'binary');
   }
