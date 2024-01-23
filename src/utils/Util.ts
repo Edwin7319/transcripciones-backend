@@ -29,4 +29,8 @@ export class Util {
       return characters.charAt(indiceAleatorio);
     }).join('');
   }
+
+  static timestampToDateString(date: number): string {
+    return moment.tz(date, DEFAULT_TIMEZONE).format('YYYY-MM-DD HH:mm');
+  }
 }
