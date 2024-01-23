@@ -67,9 +67,13 @@ export class AudioRecordingService {
       );
 
       audioId = newAudioFile._id.toString();
-      await this.update(audioId, {
-        processStatus: EAudioRecordingStatus.PENDING,
-      });
+      await this.update(
+        audioId,
+        {
+          processStatus: EAudioRecordingStatus.PENDING,
+        },
+        user
+      );
 
       const adminEmails = await this._userService.getAdminEmails();
       this._emailService.sendAdminNotification(adminEmails, user, {
@@ -79,9 +83,13 @@ export class AudioRecordingService {
 
       return this._audioRecordingModel.findById(audioId);
     } catch (error) {
-      await this.update(audioId, {
-        processStatus: EAudioRecordingStatus.ERROR,
-      });
+      await this.update(
+        audioId,
+        {
+          processStatus: EAudioRecordingStatus.ERROR,
+        },
+        user
+      );
       throw new InternalServerErrorException({
         message: 'Error al crear registro de audio',
       });
@@ -180,7 +188,8 @@ export class AudioRecordingService {
 
   async update(
     id: string,
-    data: UpdateAudioRecordingDto
+    data: UpdateAudioRecordingDto,
+    user: Partial<UserDocument>
   ): Promise<AudioRecordingDocument> {
     try {
       const currentRecording = await this.getById(id);
@@ -192,7 +201,7 @@ export class AudioRecordingService {
       const updatedRecording = await this.getById(id);
 
       this._logModel.create({
-        user: 'Edwin',
+        user: user.name,
         schema: ELogSchema.AUDIO_RECORDING,
         action: ELogAction.UPDATE,
         previous: currentRecording,
@@ -207,13 +216,13 @@ export class AudioRecordingService {
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, user: Partial<UserDocument>): Promise<boolean> {
     try {
       const currentRecording = await this.getById(id);
       await this._audioRecordingModel.deleteOne({ _id: id }).exec();
 
       this._logModel.create({
-        user: 'Edwin',
+        user: user.name,
         schema: ELogSchema.AUDIO_RECORDING,
         action: ELogAction.DELETE,
         current: currentRecording,
@@ -250,9 +259,13 @@ export class AudioRecordingService {
           files
         );
 
-      await this.update(audioId, {
-        processStatus: EAudioRecordingStatus.PROCESSED,
-      });
+      await this.update(
+        audioId,
+        {
+          processStatus: EAudioRecordingStatus.PROCESSED,
+        },
+        user
+      );
 
       const audioRecording = await this._audioRecordingModel.findById(audioId);
 
@@ -278,9 +291,13 @@ export class AudioRecordingService {
 
       return audioRecording;
     } catch (e) {
-      await this.update(audioId, {
-        processStatus: EAudioRecordingStatus.ERROR,
-      });
+      await this.update(
+        audioId,
+        {
+          processStatus: EAudioRecordingStatus.ERROR,
+        },
+        user
+      );
       throw new InternalServerErrorException({
         message: 'Error al guardar transcripciones',
       });

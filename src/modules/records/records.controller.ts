@@ -9,9 +9,10 @@ import {
   Param,
   Post,
   Put,
+  Req,
   Res,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 
@@ -26,23 +27,27 @@ export class RecordsController {
 
   @HttpCode(HttpStatus.OK)
   @Post()
-  create(@Body() data: CreateRecordDto): Promise<RecordsDocument> {
-    return this._recordsService.create(data);
+  create(
+    @Body() data: CreateRecordDto,
+    @Req() req: Request
+  ): Promise<RecordsDocument> {
+    return this._recordsService.create(data, req.user);
   }
 
   @HttpCode(HttpStatus.OK)
   @Put(':id')
   update(
     @Body() data: UpdateRecordDto,
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Req() req: Request
   ): Promise<RecordsDocument> {
-    return this._recordsService.update(id, data);
+    return this._recordsService.update(id, data, req.user);
   }
 
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<boolean> {
-    return this._recordsService.delete(id);
+  async delete(@Param('id') id: string, @Req() req: Request): Promise<boolean> {
+    return this._recordsService.delete(id, req.user);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -61,9 +66,13 @@ export class RecordsController {
   @Get('descargar-word/:recordId')
   async generateWordDocument(
     @Param('recordId') recordId: string,
-    @Res() res: Response
+    @Res() res: Response,
+    @Req() req: Request
   ): Promise<any> {
-    const buffer = await this._recordsService.generateWordDocument(recordId);
+    const buffer = await this._recordsService.generateWordDocument(
+      recordId,
+      req.user
+    );
     return res.end(buffer, 'binary');
   }
 }

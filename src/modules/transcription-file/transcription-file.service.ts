@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 
 import { Util } from '../../utils/Util';
 import { ELogAction, ELogSchema, Log } from '../log/log.schema';
+import { UserDocument } from '../user/user.schema';
 
 import { TranscriptionLocationDto } from './dto/transcription-location.dto';
 import {
@@ -83,11 +84,14 @@ export class TranscriptionFileService {
     }
   }
 
-  async getTranscriptionFile(audioRecordingId: string): Promise<Buffer> {
+  async getTranscriptionFile(
+    audioRecordingId: string,
+    user: Partial<UserDocument>
+  ): Promise<Buffer> {
     const response = await this.getTranscription(audioRecordingId);
 
     this._logModel.create({
-      user: 'Edwin',
+      user: user.name,
       schema: ELogSchema.AUDIO_RECORDING,
       action: ELogAction.DOWNLOAD_TXT_FILE,
       current: response,
