@@ -11,11 +11,11 @@ import { Model } from 'mongoose';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
-import { CommandService } from '../commands/command.service';
+import { EmailService } from '../email/email.service';
 import { ELogAction, ELogSchema, Log } from '../log/log.schema';
-import { TranscriptionFileDocument } from '../transcription-file/transcription-file.schema';
 import { TranscriptionFileService } from '../transcription-file/transcription-file.service';
 import { UserDocument } from '../user/user.schema';
+import { UserService } from '../user/user.service';
 
 import {
   AudioRecording,
@@ -36,7 +36,8 @@ export class AudioRecordingService {
     private readonly _logModel: Model<Log>,
     private readonly _configService: ConfigService,
     private readonly _transcriptionFileService: TranscriptionFileService,
-    private readonly _commandService: CommandService
+    private readonly _emailService: EmailService,
+    private readonly _userService: UserService
   ) {}
 
   async executeAudioProcess(
@@ -70,8 +71,13 @@ export class AudioRecordingService {
         processStatus: EAudioRecordingStatus.PENDING,
       });
 
+      const adminEmails = await this._userService.getAdminEmails();
+      this._emailService.sendAdminNotification(adminEmails, user, {
+        originalName: newAudioFile.originalName,
+        destination: newAudioFile.destination,
+      });
+
       return this._audioRecordingModel.findById(audioId);
-      // await this._commandService.executeCommand(originalname, fileName);
     } catch (error) {
       await this.update(audioId, {
         processStatus: EAudioRecordingStatus.ERROR,

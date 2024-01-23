@@ -5,6 +5,8 @@ import { createTransport, Transporter } from 'nodemailer';
 import { MailOptions } from 'nodemailer/lib/smtp-pool';
 
 import { EViews } from '../../views/views';
+import { AudioRecordingDocument } from '../audio-recording/audio-recording.schema';
+import { UserDocument } from '../user/user.schema';
 
 import * as path from 'path';
 
@@ -102,6 +104,32 @@ export class EmailService implements OnModuleInit {
             company: this._configService.get('email.companyName'),
             supportEmail: this._configService.get('email.support'),
             appUrl: this._configService.get('email.appUrl'),
+          },
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async sendAdminNotification(
+    adminEmails: Array<string>,
+    user: Partial<UserDocument>,
+    audioRecording: Partial<AudioRecordingDocument>
+  ): Promise<boolean> {
+    try {
+      return this.sendEmailWithTemplate(
+        {
+          to: adminEmails,
+          subject: 'Notificación carga de audio',
+        },
+        {
+          path: path.join(__dirname, `../../${EViews.ADMIN_NOTIFICATION}`),
+          params: {
+            ...audioRecording,
+            userEmail: user.email,
+            company: this._configService.get('email.companyName'),
+            supportEmail: this._configService.get('email.support'),
           },
         }
       );
