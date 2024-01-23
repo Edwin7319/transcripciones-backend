@@ -254,14 +254,29 @@ export class AudioRecordingService {
         processStatus: EAudioRecordingStatus.PROCESSED,
       });
 
-      this._logModel.create({
-        user: user.name,
-        schema: ELogSchema.TRANSCRIPTION_FILE,
-        action: ELogAction.CREATE,
-        current: fileDocument,
-      });
+      const audioRecording = await this._audioRecordingModel.findById(audioId);
 
-      return this._audioRecordingModel.findById(audioId);
+      Promise.all([
+        this._logModel.create({
+          user: user.name,
+          schema: ELogSchema.TRANSCRIPTION_FILE,
+          action: ELogAction.CREATE,
+          current: fileDocument,
+        }),
+        this._emailService.sendUserNotification(
+          {
+            email: user.email,
+            name: user.name,
+            lastName: user.lastName,
+          },
+          {
+            creationTime: audioRecording.creationTime,
+            originalName: audioRecording.originalName,
+          }
+        ),
+      ]);
+
+      return audioRecording;
     } catch (e) {
       await this.update(audioId, {
         processStatus: EAudioRecordingStatus.ERROR,

@@ -4,6 +4,7 @@ import * as ejs from 'ejs';
 import { createTransport, Transporter } from 'nodemailer';
 import { MailOptions } from 'nodemailer/lib/smtp-pool';
 
+import { Util } from '../../utils/Util';
 import { EViews } from '../../views/views';
 import { AudioRecordingDocument } from '../audio-recording/audio-recording.schema';
 import { UserDocument } from '../user/user.schema';
@@ -128,6 +129,32 @@ export class EmailService implements OnModuleInit {
           params: {
             ...audioRecording,
             userEmail: user.email,
+            company: this._configService.get('email.companyName'),
+            supportEmail: this._configService.get('email.support'),
+          },
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async sendUserNotification(
+    user: Partial<UserDocument>,
+    audioRecording: Partial<AudioRecordingDocument>
+  ): Promise<boolean> {
+    try {
+      return this.sendEmailWithTemplate(
+        {
+          to: [user.email],
+          subject: 'Notificación transcripciones cargadas',
+        },
+        {
+          path: path.join(__dirname, `../../${EViews.USER_NOTIFICATION}`),
+          params: {
+            ...user,
+            ...audioRecording,
+            audioDate: Util.timestampToDateString(audioRecording.creationTime),
             company: this._configService.get('email.companyName'),
             supportEmail: this._configService.get('email.support'),
           },

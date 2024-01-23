@@ -28,7 +28,7 @@
                                                     <h1
                                                             style="font-size:18px;line-height:30px;color:#073F5C;word-break:normal; text-align: center"
                                                     >
-                                                        Notificación de creación de usuario
+                                                        Notificación de transcripción
                                                     </h1>
                                                 </td>
                                             </tr>
@@ -56,28 +56,28 @@
                                                             <span style="font-size: 14px; font-weight: bold;"><%= company %></span>
                                                         </p>
                                                         <p>
-                                                            Hola <%= name %> <%= lastName %>, Por medio de la presente nos ponemos en contacto con usted, para informarle que hemos registrado su usuario en nuestro sistema.
+                                                            Hola <%= name %> <%= lastName %>, por medio de la presente nos ponemos en contacto con usted, para informarle que el audio  <strong><%= originalName %></strong> ha sido procesado.
                                                         </p>
                                                         <p>
-                                                            Para acceder a los servicios ofrecidos por el sistema debe acceder al enlace <%= appUrl %>, con las siguientes credenciales
+                                                            Para visualizar la transcripción, por favor ingrese a la opción <strong>Registro de audio</strong>
+                                                        </p>
+                                                        <p>
+                                                            Información de audio:
                                                         </p>
                                                         <div>
                                                             <table>
                                                                 <tr>
-                                                                    <th><strong>Usuario:</strong></th>
-                                                                    <th><%= email %></th>
+                                                                    <th><strong>Nombre:</strong></th>
+                                                                    <th><%= originalName %></th>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td><strong>Contraseña:</strong></td>
-                                                                    <td><%= password %></td>
+                                                                    <td><strong>Fecha de carga:</strong></td>
+                                                                    <td><%= audioDate %></td>
                                                                 </tr>
                                                             </table>
                                                         </div>
                                                         <br>
                                                         <br>
-                                                        <p>
-                                                            Una vez ingresado se te solicitará crear una nueva contraseña por medidas de seguridad.
-                                                        </p>
                                                         <p>
                                                             Si tienes problemas para ingresar al sitio con tu nueva contraseña por favor ponte en contacto con <strong><%= supportEmail %></strong>
                                                         </p>
