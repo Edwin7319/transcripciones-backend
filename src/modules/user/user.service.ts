@@ -253,18 +253,6 @@ export class UserService {
     }
   }
 
-  private getByEmail(email: string): Promise<UserDocument> {
-    return this._userModel.findOne({ email }).exec();
-  }
-  private getActiveUserByEmail(email: string): Promise<UserDocument> {
-    return this._userModel.findOne({ email, status: EStatus.ENABLED }).exec();
-  }
-
-  private generateEncryptedPass(password: string): string {
-    const salt = genSaltSync(10);
-    return hashSync(password, salt);
-  }
-
   async updateStatus(id: string, status: string): Promise<UserDocument> {
     try {
       await this._userModel.updateOne(
@@ -280,5 +268,64 @@ export class UserService {
         message: 'Error al actualizar estado de usuario',
       });
     }
+  }
+
+  private getByEmail(email: string): Promise<UserDocument> {
+    return this._userModel.findOne({ email }).exec();
+  }
+  private getActiveUserByEmail(email: string): Promise<UserDocument> {
+    return this._userModel.findOne({ email, status: EStatus.ENABLED }).exec();
+  }
+
+  private generateEncryptedPass(password: string): string {
+    const salt = genSaltSync(10);
+    return hashSync(password, salt);
+  }
+
+  async getAdminEmails(): Promise<Array<string>> {
+    const response = await this._userModel.aggregate([
+      {
+        $lookup: {
+          from: 'Rol',
+          localField: 'roles',
+          foreignField: '_id',
+          as: 'roles',
+        },
+      },
+      {
+        $unwind: {
+          path: '$roles',
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $match: {
+          'roles.name': {
+            $regex: /^Administrador$/i,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            _id: '$_id',
+            email: '$email',
+          },
+          roles: {
+            $push: '$roles',
+          },
+        },
+      },
+      {
+        $addFields: {
+          _id: '$_id._id',
+          email: '$_id.email',
+        },
+      },
+      {
+        $sort: { _id: -1 },
+      },
+    ]);
+    return (response || []).map((r: UserDocument) => r.email);
   }
 }
