@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { PaginationDto } from '../../shared/pagination.dto';
 import { Util } from '../../utils/Util';
 import { ELogAction, ELogSchema, Log } from '../log/log.schema';
+import { UserDocument } from '../user/user.schema';
 
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
@@ -21,7 +22,10 @@ export class RecordsService {
     private readonly _logModel: Model<Log>
   ) {}
 
-  async create(data: CreateRecordDto): Promise<RecordsDocument> {
+  async create(
+    data: CreateRecordDto,
+    user: Partial<UserDocument>
+  ): Promise<RecordsDocument> {
     try {
       const response = await this._recordsSchema.create({
         text: data.text,
@@ -31,7 +35,7 @@ export class RecordsService {
       });
 
       this._logModel.create({
-        user: 'Edwin',
+        user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.CREATE,
         current: response,
@@ -45,14 +49,18 @@ export class RecordsService {
     }
   }
 
-  async update(id: string, data: UpdateRecordDto): Promise<RecordsDocument> {
+  async update(
+    id: string,
+    data: UpdateRecordDto,
+    user: Partial<UserDocument>
+  ): Promise<RecordsDocument> {
     try {
       const currentRecord = await this.getById(id);
       await this._recordsSchema.updateOne({ _id: id }, { ...data }).exec();
       const updatedRecord = await this.getById(id);
 
       this._logModel.create({
-        user: 'Edwin',
+        user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.UPDATE,
         current: updatedRecord,
@@ -67,13 +75,13 @@ export class RecordsService {
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, user: Partial<UserDocument>): Promise<boolean> {
     try {
       const currentRecord = await this.getById(id);
       await this._recordsSchema.deleteOne({ _id: id }).exec();
 
       this._logModel.create({
-        user: 'Edwin',
+        user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.DELETE,
         current: currentRecord,
@@ -116,12 +124,15 @@ export class RecordsService {
     }
   }
 
-  async generateWordDocument(recordId: string): Promise<Buffer> {
+  async generateWordDocument(
+    recordId: string,
+    user: Partial<UserDocument>
+  ): Promise<Buffer> {
     try {
       const record = await this.getById(recordId);
 
       this._logModel.create({
-        user: 'Edwin',
+        user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.DOWNLOAD_DOCX_FILE,
         current: record,

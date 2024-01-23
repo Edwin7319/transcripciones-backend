@@ -54,9 +54,10 @@ export class AudioRecordingController {
   @Put(':id')
   async edit(
     @Body() data: UpdateAudioRecordingDto,
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Req() req: Request
   ): Promise<AudioRecordingDocument> {
-    return this._audioRecordingService.update(id, data);
+    return this._audioRecordingService.update(id, data, req.user);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -75,8 +76,8 @@ export class AudioRecordingController {
 
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<boolean> {
-    return this._audioRecordingService.delete(id);
+  async delete(@Param('id') id: string, @Req() req: Request): Promise<boolean> {
+    return this._audioRecordingService.delete(id, req.user);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -106,11 +107,11 @@ export class AudioRecordingController {
   saveFileTranscription(
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Body('audioId') audioId: string,
-    @Req() res: Request
+    @Req() req: Request
   ): Promise<AudioRecordingDocument> {
     return this._audioRecordingService.saveFileTranscription(
       audioId,
-      res.user,
+      req.user,
       files
     );
   }
