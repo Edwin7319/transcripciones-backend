@@ -7,7 +7,8 @@ import * as process from 'process';
 
 const AVAILABLE_FORMATS = ['audio'];
 
-const FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const AUDIO_FILE_SIZE = 99999 * 1024 * 1024; // 99999MB
+const TRANSCRIPTION_FILE_SIZE = 500 * 1024 * 1024; // 999999MB
 
 export const AUDIO_MULTER: MulterOptions = {
   fileFilter: (req, file, cb) => {
@@ -27,7 +28,7 @@ export const AUDIO_MULTER: MulterOptions = {
     }
   },
   limits: {
-    fileSize: FILE_SIZE,
+    fileSize: AUDIO_FILE_SIZE,
   },
   storage: diskStorage({
     destination: (req, file, cb) => {
@@ -47,7 +48,7 @@ export const AUDIO_MULTER: MulterOptions = {
 
 export const TRANSCRIPTION_MULTER: MulterOptions = {
   limits: {
-    fileSize: 20 * 1024 * 1024,
+    fileSize: TRANSCRIPTION_FILE_SIZE,
   },
   storage: memoryStorage(),
 };
