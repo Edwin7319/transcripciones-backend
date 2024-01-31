@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+  mongo_db:
+    container_name: mongodb
+    image: mongo:latest
+    restart: always
+    environment:
+      # user
+      MONGO_INITDB_ROOT_USERNAME: 'transcripciones'
+      # password
+      MONGO_INITDB_ROOT_PASSWORD: 'test12345'
+      # database
+      MONGO_INITDB_DATABASE: 'transcripciones'
+      # root password
+      MONGODB_ROOT_PASSWORD: 'test12345'
+    ports:
+      - '30505:27017'
+    expose:
+      - '27017'
+    volumes:
+      - mongo-db-volume:/data/db
+      - mongo-config-volume:/data/configdb
+volumes:
+  mongo-config-volume:
+  mongo-db-volume:
