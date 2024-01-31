@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as fs from 'fs-extra';
 import { Model } from 'mongoose';
@@ -22,8 +21,7 @@ export class TranscriptionFileService {
     @InjectModel(TranscriptionFile.name)
     private readonly _transcriptionFileMode: Model<TranscriptionFile>,
     @InjectModel(Log.name)
-    private readonly _logModel: Model<Log>,
-    private readonly _configService: ConfigService
+    private readonly _logModel: Model<Log>
   ) {}
 
   async saveTranscriptionFiles(

@@ -328,4 +328,23 @@ export class UserService {
     ]);
     return (response || []).map((r: UserDocument) => r.email);
   }
+
+  async update(id: string, data: CreateUserDto): Promise<boolean> {
+    try {
+      await this._userModel.updateOne(
+        {
+          _id: new ObjectId(id),
+        },
+        {
+          ...data,
+          roles: data.roles.map((r) => new ObjectId(r)),
+        }
+      );
+      return true;
+    } catch (e) {
+      throw new InternalServerErrorException({
+        message: 'Error al actualizar información de usuario',
+      });
+    }
+  }
 }
