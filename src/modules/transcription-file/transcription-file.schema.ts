@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import * as mongoose from 'mongoose';
 
+import { Util } from '../../utils/Util';
 import { AudioRecording } from '../audio-recording/audio-recording.schema';
 
 import { TranscriptionLocationDto } from './dto/transcription-location.dto';
@@ -24,6 +25,9 @@ export class TranscriptionFile {
 
   @Prop({ type: Array, required: true })
   transcriptionArray: Array<TranscriptionLocationDto>;
+
+  @Prop({ type: Number, required: false, default: Util.getCurrentTimestamp() })
+  creationTime: number;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

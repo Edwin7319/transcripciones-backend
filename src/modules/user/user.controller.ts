@@ -27,6 +27,15 @@ export class UserController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Put('editar/:id')
+  update(
+    @Body() data: CreateUserDto,
+    @Param('id') id: string
+  ): Promise<boolean> {
+    return this._userService.update(id, data);
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Get()
   getAll(): Promise<PaginationDto<UserDocument>> {
     return this._userService.getAll();

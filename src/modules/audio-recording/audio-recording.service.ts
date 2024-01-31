@@ -79,6 +79,7 @@ export class AudioRecordingService {
       this._emailService.sendAdminNotification(adminEmails, user, {
         originalName: newAudioFile.originalName,
         destination: newAudioFile.destination,
+        _id: newAudioFile._id,
       });
 
       return this._audioRecordingModel.findById(audioId);
@@ -269,7 +270,7 @@ export class AudioRecordingService {
 
       const audioRecording = await this._audioRecordingModel.findById(audioId);
 
-      Promise.all([
+      await Promise.all([
         this._logModel.create({
           user: user.name,
           schema: ELogSchema.TRANSCRIPTION_FILE,
