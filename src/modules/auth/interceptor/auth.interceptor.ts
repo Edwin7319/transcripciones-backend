@@ -40,7 +40,7 @@ export class AuthInterceptor implements NestInterceptor {
       });
     } catch (error) {
       throw new UnauthorizedException({
-        message: 'Token no válido',
+        message: 'Sesión caducada',
       });
     }
 
