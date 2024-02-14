@@ -41,4 +41,14 @@ export class TranscriptionFileController {
     );
     return res.type('txt').end(buffer, 'binary');
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('actualizar-estado')
+  async updateStatus(): Promise<{ message: string; response: any }> {
+    const response = await this._transcriptionFileService.updateStatus();
+    return {
+      message: 'Ok',
+      response,
+    };
+  }
 }
