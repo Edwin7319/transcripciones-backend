@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import * as mongoose from 'mongoose';
 
+import { EStatus } from '../../shared/enum';
 import { Util } from '../../utils/Util';
 import { AudioRecording } from '../audio-recording/audio-recording.schema';
 
@@ -35,6 +36,9 @@ export class TranscriptionFile {
     required: false,
   })
   audioRecording: AudioRecording;
+
+  @Prop({ type: String, required: false, default: EStatus.ENABLED })
+  status: EStatus;
 }
 
 export const TranscriptionFileSchema =

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as fs from 'fs-extra';
 import { Model } from 'mongoose';
 
+import { EStatus } from '../../shared/enum';
 import { Util } from '../../utils/Util';
 import { ELogAction, ELogSchema, Log } from '../log/log.schema';
 import { UserDocument } from '../user/user.schema';
@@ -28,11 +29,14 @@ export class TranscriptionFileService {
     audioRecordingId: string,
     files: Array<Express.Multer.File>
   ): Promise<TranscriptionFileDocument> {
-    const transcription = await this.getTranscription(audioRecordingId);
-
-    if (transcription) {
-      return transcription;
-    }
+    await this._transcriptionFileMode.updateMany(
+      {
+        audioRecording: audioRecordingId,
+      },
+      {
+        status: EStatus.DISABLED,
+      }
+    );
 
     const fileWithText = files.map((file) => {
       return {
@@ -60,6 +64,7 @@ export class TranscriptionFileService {
         transcriptionLocation,
         transcription,
         transcriptionArray,
+        status: EStatus.ENABLED,
       });
     } catch (error) {
       throw new InternalServerErrorException({
@@ -74,6 +79,7 @@ export class TranscriptionFileService {
     try {
       return this._transcriptionFileMode.findOne({
         audioRecording: audioRecordingId,
+        status: EStatus.ENABLED,
       });
     } catch (error) {
       throw new InternalServerErrorException({
@@ -87,6 +93,7 @@ export class TranscriptionFileService {
     user: Partial<UserDocument>
   ): Promise<Buffer> {
     const response = await this.getTranscription(audioRecordingId);
+    console.log(response);
 
     this._logModel.create({
       user: user.name,
@@ -95,6 +102,15 @@ export class TranscriptionFileService {
       current: response,
     });
     return Buffer.from(response.transcription, 'utf-8');
+  }
+
+  async updateStatus(): Promise<any> {
+    return this._transcriptionFileMode.updateMany(
+      {},
+      {
+        status: EStatus.ENABLED,
+      }
+    );
   }
 
   private async readFile(path: string): Promise<string> {
