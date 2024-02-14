@@ -93,7 +93,6 @@ export class TranscriptionFileService {
     user: Partial<UserDocument>
   ): Promise<Buffer> {
     const response = await this.getTranscription(audioRecordingId);
-    console.log(response);
 
     this._logModel.create({
       user: user.name,
