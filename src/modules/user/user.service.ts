@@ -273,6 +273,10 @@ export class UserService {
   private getByEmail(email: string): Promise<UserDocument> {
     return this._userModel.findOne({ email }).exec();
   }
+
+  getById(id: string): Promise<UserDocument> {
+    return this._userModel.findOne({ _id: new ObjectId(id) }).exec();
+  }
   private getActiveUserByEmail(email: string): Promise<UserDocument> {
     return this._userModel.findOne({ email, status: EStatus.ENABLED }).exec();
   }

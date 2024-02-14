@@ -269,6 +269,9 @@ export class AudioRecordingService {
       );
 
       const audioRecording = await this._audioRecordingModel.findById(audioId);
+      const originalUser = await this._userService.getById(
+        audioRecording.user?.toString()
+      );
 
       await Promise.all([
         this._logModel.create({
@@ -279,9 +282,9 @@ export class AudioRecordingService {
         }),
         this._emailService.sendUserNotification(
           {
-            email: user.email,
-            name: user.name,
-            lastName: user.lastName,
+            email: originalUser.email,
+            name: originalUser.name,
+            lastName: originalUser.lastName,
           },
           {
             creationTime: audioRecording.creationTime,
