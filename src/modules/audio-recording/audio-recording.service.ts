@@ -126,11 +126,12 @@ export class AudioRecordingService {
       pathCopy,
     });
 
-    this._logModel.create({
+    await this._logModel.create({
       user: user.name,
       schema: ELogSchema.AUDIO_RECORDING,
       action: ELogAction.CREATE,
       current: newAudioFile,
+      creationTime: Util.getCurrentTimestamp(),
     });
 
     return {
@@ -201,12 +202,13 @@ export class AudioRecordingService {
 
       const updatedRecording = await this.getById(id);
 
-      this._logModel.create({
+      await this._logModel.create({
         user: user.name,
         schema: ELogSchema.AUDIO_RECORDING,
         action: ELogAction.UPDATE,
         previous: currentRecording,
         current: updatedRecording,
+        creationTime: Util.getCurrentTimestamp(),
       });
 
       return updatedRecording;
@@ -222,11 +224,12 @@ export class AudioRecordingService {
       const currentRecording = await this.getById(id);
       await this._audioRecordingModel.deleteOne({ _id: id }).exec();
 
-      this._logModel.create({
+      await this._logModel.create({
         user: user.name,
         schema: ELogSchema.AUDIO_RECORDING,
         action: ELogAction.DELETE,
         current: currentRecording,
+        creationTime: Util.getCurrentTimestamp(),
       });
       return true;
     } catch (error) {
@@ -279,6 +282,7 @@ export class AudioRecordingService {
           schema: ELogSchema.TRANSCRIPTION_FILE,
           action: ELogAction.CREATE,
           current: fileDocument,
+          creationTime: Util.getCurrentTimestamp(),
         }),
         this._emailService.sendUserNotification(
           {
