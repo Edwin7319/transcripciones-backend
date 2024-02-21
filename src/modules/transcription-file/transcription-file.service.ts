@@ -94,11 +94,12 @@ export class TranscriptionFileService {
   ): Promise<Buffer> {
     const response = await this.getTranscription(audioRecordingId);
 
-    this._logModel.create({
+    await this._logModel.create({
       user: user.name,
       schema: ELogSchema.AUDIO_RECORDING,
       action: ELogAction.DOWNLOAD_TXT_FILE,
       current: response,
+      creationTime: Util.getCurrentTimestamp(),
     });
     return Buffer.from(response.transcription, 'utf-8');
   }

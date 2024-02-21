@@ -34,11 +34,12 @@ export class RecordsService {
         creationTime: Util.getCurrentTimestamp(),
       });
 
-      this._logModel.create({
+      await this._logModel.create({
         user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.CREATE,
         current: response,
+        creationTime: Util.getCurrentTimestamp(),
       });
 
       return response;
@@ -59,12 +60,13 @@ export class RecordsService {
       await this._recordsSchema.updateOne({ _id: id }, { ...data }).exec();
       const updatedRecord = await this.getById(id);
 
-      this._logModel.create({
+      await this._logModel.create({
         user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.UPDATE,
         current: updatedRecord,
         previous: currentRecord,
+        creationTime: Util.getCurrentTimestamp(),
       });
 
       return updatedRecord;
@@ -80,11 +82,12 @@ export class RecordsService {
       const currentRecord = await this.getById(id);
       await this._recordsSchema.deleteOne({ _id: id }).exec();
 
-      this._logModel.create({
+      await this._logModel.create({
         user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.DELETE,
         current: currentRecord,
+        creationTime: Util.getCurrentTimestamp(),
       });
       return true;
     } catch (error) {
@@ -131,11 +134,12 @@ export class RecordsService {
     try {
       const record = await this.getById(recordId);
 
-      this._logModel.create({
+      await this._logModel.create({
         user: user.name,
         schema: ELogSchema.RECORDS,
         action: ELogAction.DOWNLOAD_DOCX_FILE,
         current: record,
+        creationTime: Util.getCurrentTimestamp(),
       });
 
       return htmlToDocx(record.text);
