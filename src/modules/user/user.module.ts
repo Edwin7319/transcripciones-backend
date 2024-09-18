@@ -7,6 +7,7 @@ import { Role, RoleSchema } from '../role/role.schema';
 import { UserController } from './user.controller';
 import { User, UserSchema } from './user.schema';
 import { UserService } from './user.service';
+import { Setting, SettingSchema } from '../setting/setting.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,10 @@ import { UserService } from './user.service';
         name: Role.name,
         schema: RoleSchema,
       },
+      {
+        name: Setting.name,
+        schema: SettingSchema,
+      }
     ]),
     EmailModule,
   ],

@@ -22,6 +22,7 @@ import { Role, RoleDocument } from '../role/role.schema';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { EPasswordStatus, User, UserDocument } from './user.schema';
+import { Setting, SettingDocument } from '../setting/setting.schema';
 
 @Injectable()
 export class UserService {
@@ -30,11 +31,24 @@ export class UserService {
     private readonly _userModel: Model<User>,
     @InjectModel(Role.name)
     private readonly _roleModel: Model<Role>,
+    @InjectModel(Setting.name)
+    private readonly _settingModel: Model<Setting>,
     private readonly _emailService: EmailService
   ) {}
 
-  async register(data: CreateUserDto): Promise<UserDocument> {
+  async register(data: CreateUserDto): Promise<any> {
     const user = await this.getByEmail(data.email);
+
+    const users = await this.getAll();
+    const totalRecords = users.metadata[0].total;
+
+    const settings = await this.getByCode('001');
+    const maxValueUsers = settings?.data?.length ? +settings.data[0].value : 0;
+    if (totalRecords >= maxValueUsers) {
+      throw new ConflictException({
+        message: 'Ha excedido la cantidad máxima de usuarios a registrar',
+      });
+    }
 
     if (user) {
       throw new ConflictException({
@@ -351,4 +365,63 @@ export class UserService {
       });
     }
   }
+
+  async getByCode(code: string): Promise<PaginationDto<SettingDocument>> {
+    try {
+      const andQuery = [];
+
+      andQuery.push({
+        code: code
+      });
+
+      const [response] = await this._settingModel.aggregate([
+        {
+          $match: {
+            $and: andQuery
+          }
+        },
+        {
+          $group: {
+            _id: {
+              _id: '$_id',
+              name: '$name',
+              code: '$code',
+              value: '$value',
+              status: '$status',
+              creationTime: '$creationTime'
+            }
+          }
+        },
+        {
+          $addFields: {
+            _id: '$_id._id',
+            name: '$_id.name',
+            code: '$_id.code',
+            value: '$_id.value',
+            status: '$_id.status',
+            creationTime: '$_id.creationTime'
+          }
+        },
+        {
+          $sort: { _id: -1 }
+        },
+        {
+          $facet: {
+            data: [{ $limit: 1 }],
+            metadata: [
+              { $count: 'total' },
+              { $addFields: { page: 1, limit: 10 } }
+            ]
+          }
+        }
+      ]);
+
+      return response;
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Error al obtener las configuraciones'
+      });
+    }
+  }
+
 }

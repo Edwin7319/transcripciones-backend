@@ -7,6 +7,7 @@ import { RecordsModule } from '../modules/records/records.module';
 import { RoleModule } from '../modules/role/role.module';
 import { TranscriptionFileModule } from '../modules/transcription-file/transcription-file.module';
 import { UserModule } from '../modules/user/user.module';
+import { SettingModule } from '../modules/setting/setting.module';
 
 export const APP_MODULES = [
   AudioRecordingModule,
@@ -18,6 +19,7 @@ export const APP_MODULES = [
   RoleModule,
   UserModule,
   EmailModule,
+  SettingModule,
 ];
 
 export const REGEX_EMAIL = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
