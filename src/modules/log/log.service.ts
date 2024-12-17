@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 
 import { PaginationDto } from '../../shared/pagination.dto';
 
+import { LogPaginationDto } from './dto/log-pagination.dto';
 import { ELogSchema, Log, LogDocument } from './log.schema';
 
 const KEYS_TO_OMIT = ['createdAt', 'updatedAt', '__v'];
@@ -17,28 +18,81 @@ export class LogService {
   ) {}
 
   async getBySchema(
-    schemaType: ELogSchema
+    schemaType: ELogSchema,
+    pagination: LogPaginationDto
   ): Promise<PaginationDto<LogDocument>> {
+    const {
+      pageIndex: skip,
+      pageSize: limit,
+      user: userQuery,
+      code: codeQuery,
+    } = pagination;
+
+    const $andMatch = [];
+
+    if (userQuery) {
+      const userToFind = this.extractValue(userQuery);
+      if (userToFind) {
+        $andMatch.push({
+          user: { $regex: `.*${userToFind}.*`, $options: 'i' },
+        });
+      }
+    }
+
+    if (codeQuery) {
+      const codeToFind = this.extractValue(codeQuery);
+      if (codeToFind) {
+        $andMatch.push({
+          schema: { $regex: `.*${codeToFind}.*`, $options: 'i' },
+        });
+      }
+    }
+
+    // TO-DO: colocar en los aggregate, si el filtro es "AND" y no "OR"
+    /*
+             $match: {
+              $and: [
+                { schema: schemaType },
+                {
+                  $or: [
+                    { code: { $regex: codeToFind, $options: 'i' } },
+                    { user: { $regex: userToFind, $options: 'i' } },
+                  ],
+                },
+              ],
+            },
+     */
     try {
-      const [response] = await this._logModel.aggregate([
-        {
-          $match: {
-            schema: schemaType,
+      const [response] = await this._logModel.aggregate(
+        [
+          {
+            $match: {
+              $and: [{ schema: schemaType }, ...$andMatch],
+            },
           },
-        },
-        {
-          $sort: { _id: -1 },
-        },
-        {
-          $facet: {
-            data: [{ $skip: (1 - 1) * 10 }, { $limit: 9999 }],
-            metadata: [
-              { $count: 'total' },
-              { $addFields: { page: 1, limit: 10 } },
-            ],
+          {
+            $facet: {
+              data: [
+                { $sort: { _id: -1 } },
+                { $skip: skip },
+                { $limit: limit },
+              ],
+              metadata: [
+                { $count: 'total' },
+                {
+                  $addFields: {
+                    page: skip,
+                    limit: limit,
+                  },
+                },
+              ],
+            },
           },
-        },
-      ]);
+        ],
+        {
+          enableUtf8Validation: false,
+        }
+      );
 
       const data = (response.data || []).map((d) => {
         if (!d.previous || !d.current) {
@@ -67,5 +121,13 @@ export class LogService {
         message: 'Error al obtener todos los datos de auditoria',
       });
     }
+  }
+
+  private extractValue(query: string | string[]): string {
+    if (Array.isArray(query)) {
+      const lastCriteria = query[query.length - 1];
+      return lastCriteria.split(',')[1] || '';
+    }
+    return query.split(',')[1] || '';
   }
 }
